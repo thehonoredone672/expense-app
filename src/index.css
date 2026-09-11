@@ -1,0 +1,130 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #fafafc;
+  --surface: #ffffff;
+  --surface-2: #f2f2f5;
+  --text: #111113;
+  --text-muted: #8a8a92;
+  --border: #e8e8ec;
+  --accent-1: #818cf8;
+  --accent-2: #4f46e5;
+  --accent: #4f46e5;
+  --accent-text: #ffffff;
+  --danger: #d92d20;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 8px 30px -12px rgba(30, 30, 60, 0.18);
+
+  --wash: radial-gradient(120% 70% at 15% -10%, rgba(129, 140, 248, 0.14), transparent 55%),
+    radial-gradient(100% 60% at 100% 0%, rgba(99, 102, 241, 0.09), transparent 50%);
+}
+
+.dark {
+  --bg: #050506;
+  --surface: #0d0d10;
+  --surface-2: #1a1a1e;
+  --text: #f5f5f7;
+  --text-muted: #8e8e93;
+  --border: #232327;
+  --accent-1: #a5b4fc;
+  --accent-2: #818cf8;
+  --accent: #818cf8;
+  --accent-text: #08080b;
+  --danger: #ff453a;
+
+  --glass-bg: rgba(24, 24, 30, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.55);
+
+  --wash: radial-gradient(120% 70% at 15% -10%, rgba(99, 102, 241, 0.22), transparent 55%),
+    radial-gradient(100% 60% at 100% 0%, rgba(129, 140, 248, 0.12), transparent 50%);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  background: var(--bg);
+  overscroll-behavior-y: none;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+input, button, select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.bg-wash {
+  background-image: var(--wash);
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.accent-gradient {
+  background: linear-gradient(155deg, var(--accent-1), var(--accent-2));
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-sheet-up {
+  animation: sheet-up 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-pop-in {
+  animation: pop-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sheet-up, .animate-fade-in, .animate-pop-in {
+    animation: none;
+  }
+}
