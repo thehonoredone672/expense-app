@@ -16,6 +16,8 @@ import { getCurrencySymbol, todayISO } from './lib/format'
 import { exportJSON, exportCSV, readBackupFile } from './lib/backup'
 import type { PendingRecurring } from './lib/recurring'
 import { haptic } from './lib/haptics'
+import { useCelebration } from './hooks/useCelebration'
+import { PixelSpark } from './components/PixelSpark'
 
 export default function App() {
   const { expenses, addExpense, updateExpense, deleteExpense, clearAll, importExpenses, unassignTrip } =
@@ -39,6 +41,7 @@ export default function App() {
 
   const [toast, setToast] = useState<string | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const celebration = useCelebration()
 
   useEffect(() => () => {
     if (toastTimer.current) clearTimeout(toastTimer.current)
@@ -102,6 +105,7 @@ export default function App() {
       updateExpense(editing.id, data)
     } else {
       addExpense(data)
+      celebration.fire()
     }
     setFormOpen(false)
   }
@@ -120,6 +124,7 @@ export default function App() {
       tripId: expense.tripId ?? null,
       recurring: false,
     })
+    celebration.fire()
     showToast('Expense duplicated')
   }
 
@@ -134,6 +139,7 @@ export default function App() {
       addExpense({ amount: p.amount, category: p.category, note: p.note, date: today, tripId: null, recurring: true })
     }
     haptic('success')
+    celebration.fire()
     showToast(`Added ${pending.length} recurring bill${pending.length === 1 ? '' : 's'}`)
   }
 
@@ -146,6 +152,7 @@ export default function App() {
       updateTrip(editingTrip.id, data)
     } else {
       addTrip(data)
+      celebration.fire()
     }
     setTripFormOpen(false)
   }
@@ -274,6 +281,12 @@ export default function App() {
       )}
 
       {toast && <Toast message={toast} />}
+
+      {celebration.visible && (
+        <div className="pointer-events-none absolute inset-x-0 top-[22%] z-50 flex justify-center">
+          <PixelSpark key={celebration.key} />
+        </div>
+      )}
     </div>
   )
 }

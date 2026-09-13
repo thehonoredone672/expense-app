@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Receipt, Search, X, Repeat } from 'lucide-react'
+import { Receipt, Search, X, Repeat, Flame } from 'lucide-react'
 import type { CategoryId, Expense } from '../types'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { ExpenseList } from '../components/ExpenseList'
@@ -7,6 +7,7 @@ import { CATEGORY_MAP } from '../data/categories'
 import { formatCurrency } from '../lib/format'
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber'
 import { getPendingRecurring } from '../lib/recurring'
+import { computeStreak } from '../lib/streak'
 
 interface Props {
   expenses: Expense[]
@@ -58,6 +59,7 @@ export function HomeScreen({
 
   const total = monthExpenses.reduce((sum, e) => sum + e.amount, 0)
   const animatedTotal = useAnimatedNumber(total)
+  const streak = useMemo(() => computeStreak(expenses), [expenses])
 
   const quickCategories = useMemo(() => {
     const counts = new Map<CategoryId, number>()
@@ -92,14 +94,25 @@ export function HomeScreen({
             <p className="text-[13px] font-medium text-[var(--text-muted)]">Total spent</p>
             <p className="text-4xl font-semibold tabular-nums">{formatCurrency(animatedTotal, currency)}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
-            aria-label={searchOpen ? 'Close search' : 'Search'}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--text-muted)] transition-opacity active:opacity-60"
-          >
-            {searchOpen ? <X size={18} /> : <Search size={18} />}
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            {streak >= 2 && (
+              <span
+                className="flex items-center gap-1 rounded-full border border-[var(--border)] px-2.5 py-1"
+                title={`${streak}-day logging streak`}
+              >
+                <Flame size={13} className="animate-flicker" color="#f97316" fill="#f97316" />
+                <span className="text-[12.5px] font-semibold tabular-nums">{streak}</span>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
+              aria-label={searchOpen ? 'Close search' : 'Search'}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-muted)] transition-opacity active:opacity-60"
+            >
+              {searchOpen ? <X size={18} /> : <Search size={18} />}
+            </button>
+          </div>
         </div>
 
         {budget != null && (
