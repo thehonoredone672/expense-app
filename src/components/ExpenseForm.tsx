@@ -3,8 +3,10 @@ import { X, Check, Trash2, CalendarDays, Repeat } from 'lucide-react'
 import type { CategoryId, Expense } from '../types'
 import { CategoryPicker } from './CategoryPicker'
 import { AmountKeypad } from './AmountKeypad'
+import { SheetGrabber } from './SheetGrabber'
 import { todayISO } from '../lib/format'
 import { haptic } from '../lib/haptics'
+import { useSheetDrag } from '../hooks/useSheetDrag'
 
 interface Props {
   initial: Expense | null
@@ -35,6 +37,7 @@ export function ExpenseForm({
   const [date, setDate] = useState(() => initial?.date ?? defaultDate)
   const [recurring, setRecurring] = useState(() => initial?.recurring ?? false)
   const tripId = initial ? initial.tripId ?? null : (presetTripId ?? null)
+  const { dragging, handleStyle, handlers } = useSheetDrag(onClose)
 
   const numericAmount = parseFloat(amount) || 0
   const canSave = numericAmount > 0
@@ -52,11 +55,12 @@ export function ExpenseForm({
   }
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-wash animate-sheet-up">
-      <div
-        className="flex items-center justify-between px-4 pb-3"
-        style={{ paddingTop: 'calc(var(--safe-top) + 12px)' }}
-      >
+    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-wash animate-sheet-up" style={handleStyle}>
+      <div {...handlers} style={{ touchAction: 'none', paddingTop: 'var(--safe-top)' }}>
+        <SheetGrabber />
+      </div>
+
+      <div className="flex items-center justify-between px-4 pb-3">
         <button
           type="button"
           onClick={onClose}
@@ -65,7 +69,9 @@ export function ExpenseForm({
         >
           <X size={19} />
         </button>
-        <span className="text-[15px] font-semibold">{initial ? 'Edit expense' : 'Add expense'}</span>
+        <span {...handlers} style={{ touchAction: 'none' }} className="text-[15px] font-semibold">
+          {initial ? 'Edit expense' : 'Add expense'}
+        </span>
         <button
           type="button"
           onClick={handleSave}
@@ -78,7 +84,7 @@ export function ExpenseForm({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" style={dragging ? { overflow: 'hidden' } : undefined}>
         {tripId && tripName && (
           <div className="flex justify-center pt-4">
             <span className="glass rounded-full px-3 py-1 text-[12px] font-medium text-[var(--text-muted)]">

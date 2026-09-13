@@ -3,7 +3,9 @@ import { X, Check, Trash2 } from 'lucide-react'
 import type { Trip, TripIconId } from '../types'
 import { TRIP_ICONS } from '../data/tripIcons'
 import { AmountKeypad } from './AmountKeypad'
+import { SheetGrabber } from './SheetGrabber'
 import { haptic } from '../lib/haptics'
+import { useSheetDrag } from '../hooks/useSheetDrag'
 
 interface Props {
   initial: Trip | null
@@ -18,6 +20,7 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
   const [budget, setBudget] = useState(() => (initial ? String(initial.budget) : '0'))
   const [icon, setIcon] = useState<TripIconId>(() => initial?.icon ?? 'plane')
 
+  const { dragging, handleStyle, handlers } = useSheetDrag(onClose)
   const numericBudget = parseFloat(budget) || 0
   const canSave = numericBudget > 0 && name.trim().length > 0
 
@@ -34,11 +37,12 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
   }
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-wash animate-sheet-up">
-      <div
-        className="flex items-center justify-between px-4 pb-3"
-        style={{ paddingTop: 'calc(var(--safe-top) + 12px)' }}
-      >
+    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-wash animate-sheet-up" style={handleStyle}>
+      <div {...handlers} style={{ touchAction: 'none', paddingTop: 'var(--safe-top)' }}>
+        <SheetGrabber />
+      </div>
+
+      <div className="flex items-center justify-between px-4 pb-3">
         <button
           type="button"
           onClick={onClose}
@@ -47,7 +51,9 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
         >
           <X size={19} />
         </button>
-        <span className="text-[15px] font-semibold">{initial ? 'Edit trip' : 'New trip'}</span>
+        <span {...handlers} style={{ touchAction: 'none' }} className="text-[15px] font-semibold">
+          {initial ? 'Edit trip' : 'New trip'}
+        </span>
         <button
           type="button"
           onClick={handleSave}
@@ -60,7 +66,7 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" style={dragging ? { overflow: 'hidden' } : undefined}>
         <div className="flex items-baseline justify-center gap-1 py-6">
           <span className="text-3xl font-medium text-[var(--text-muted)]">{currencySymbol}</span>
           <span className="text-5xl font-semibold tabular-nums">{budget}</span>

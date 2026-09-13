@@ -3,8 +3,10 @@ import { ArrowLeft, Pencil, Plus, Luggage } from 'lucide-react'
 import type { Expense, Trip } from '../types'
 import { TRIP_ICON_MAP } from '../data/tripIcons'
 import { ExpenseList } from '../components/ExpenseList'
+import { SheetGrabber } from '../components/SheetGrabber'
 import { formatCurrency } from '../lib/format'
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber'
+import { useSheetDrag } from '../hooks/useSheetDrag'
 
 interface Props {
   trip: Trip
@@ -15,6 +17,7 @@ interface Props {
   onAddExpense: () => void
   onEditExpense: (expense: Expense) => void
   onDeleteExpense: (id: string) => void
+  onDuplicateExpense: (expense: Expense) => void
 }
 
 export function TripDetailScreen({
@@ -26,6 +29,7 @@ export function TripDetailScreen({
   onAddExpense,
   onEditExpense,
   onDeleteExpense,
+  onDuplicateExpense,
 }: Props) {
   const tripExpenses = useMemo(() => expenses.filter((e) => e.tripId === trip.id), [expenses, trip.id])
   const spent = tripExpenses.reduce((sum, e) => sum + e.amount, 0)
@@ -34,13 +38,15 @@ export function TripDetailScreen({
   const remaining = trip.budget - spent
   const animatedRemaining = useAnimatedNumber(Math.abs(remaining))
   const Icon = TRIP_ICON_MAP[trip.icon]
+  const { dragging, handleStyle, handlers } = useSheetDrag(onClose)
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-wash animate-sheet-up">
-      <div
-        className="flex items-center justify-between px-4 pb-3"
-        style={{ paddingTop: 'calc(var(--safe-top) + 12px)' }}
-      >
+    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-wash animate-sheet-up" style={handleStyle}>
+      <div {...handlers} style={{ touchAction: 'none', paddingTop: 'var(--safe-top)' }}>
+        <SheetGrabber />
+      </div>
+
+      <div className="flex items-center justify-between px-4 pb-3">
         <button
           type="button"
           onClick={onClose}
@@ -49,7 +55,9 @@ export function TripDetailScreen({
         >
           <ArrowLeft size={18} />
         </button>
-        <span className="text-[15px] font-semibold">Trip</span>
+        <span {...handlers} style={{ touchAction: 'none' }} className="text-[15px] font-semibold">
+          Trip
+        </span>
         <button
           type="button"
           onClick={onAddExpense}
@@ -60,7 +68,7 @@ export function TripDetailScreen({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-6">
+      <div className="flex-1 overflow-y-auto px-5 pb-6" style={dragging ? { overflow: 'hidden' } : undefined}>
         <div className="glass rounded-3xl px-5 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -107,6 +115,7 @@ export function TripDetailScreen({
             currency={currency}
             onEdit={onEditExpense}
             onDelete={onDeleteExpense}
+            onDuplicate={onDuplicateExpense}
             emptyIcon={Luggage}
             emptyTitle="No expenses logged"
             emptySubtitle="Add an expense to start tracking this trip's spending."

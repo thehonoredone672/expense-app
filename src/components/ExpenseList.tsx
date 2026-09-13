@@ -11,6 +11,7 @@ interface Props {
   currency: string
   onEdit: (expense: Expense) => void
   onDelete: (id: string) => void
+  onDuplicate?: (expense: Expense) => void
   emptyIcon: LucideIcon
   emptyTitle: string
   emptySubtitle: string
@@ -23,6 +24,7 @@ export function ExpenseList({
   currency,
   onEdit,
   onDelete,
+  onDuplicate,
   emptyIcon,
   emptyTitle,
   emptySubtitle,
@@ -71,6 +73,7 @@ export function ExpenseList({
                 onOpenChange={(open) => setOpenRowId(open ? expense.id : null)}
                 onDelete={() => onDelete(expense.id)}
                 onTap={() => onEdit(expense)}
+                onLongPress={onDuplicate ? () => onDuplicate(expense) : undefined}
               >
                 <ExpenseRow expense={expense} currency={currency} />
               </SwipeToDelete>

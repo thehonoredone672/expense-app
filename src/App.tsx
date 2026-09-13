@@ -111,6 +111,18 @@ export default function App() {
     if (editing?.id === id) setFormOpen(false)
   }
 
+  function handleDuplicate(expense: Expense) {
+    addExpense({
+      amount: expense.amount,
+      category: expense.category,
+      note: expense.note,
+      date: todayISO(),
+      tripId: expense.tripId ?? null,
+      recurring: false,
+    })
+    showToast('Expense duplicated')
+  }
+
   function handleMonthChange(y: number, m: number) {
     setYear(y)
     setMonth(m)
@@ -168,7 +180,7 @@ export default function App() {
 
   return (
     <div className="relative mx-auto flex min-h-dvh max-w-md flex-col overflow-hidden border-[var(--border)] bg-[var(--bg)] bg-wash text-[var(--text)] sm:my-4 sm:min-h-[calc(100dvh-2rem)] sm:border">
-      <div className="relative z-10 flex-1 overflow-y-auto">
+      <div key={tab} className="relative z-10 flex-1 overflow-y-auto animate-tab-in">
         {tab === 'home' && (
           <HomeScreen
             expenses={expenses}
@@ -180,6 +192,7 @@ export default function App() {
             onEdit={openEdit}
             onAdd={openAdd}
             onDelete={handleDelete}
+            onDuplicate={handleDuplicate}
             onAddRecurring={handleAddRecurring}
           />
         )}
@@ -232,6 +245,7 @@ export default function App() {
           onAddExpense={() => openAddForTrip(activeTrip.id)}
           onEditExpense={openEdit}
           onDeleteExpense={handleDelete}
+          onDuplicateExpense={handleDuplicate}
         />
       )}
 

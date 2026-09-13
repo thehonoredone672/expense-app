@@ -18,6 +18,7 @@ interface Props {
   onEdit: (expense: Expense) => void
   onAdd: (presetCategory?: CategoryId) => void
   onDelete: (id: string) => void
+  onDuplicate: (expense: Expense) => void
   onAddRecurring: (pending: ReturnType<typeof getPendingRecurring>) => void
 }
 
@@ -31,6 +32,7 @@ export function HomeScreen({
   onEdit,
   onAdd,
   onDelete,
+  onDuplicate,
   onAddRecurring,
 }: Props) {
   const [searchOpen, setSearchOpen] = useState(false)
@@ -164,7 +166,7 @@ export function HomeScreen({
                 key={cat.id}
                 type="button"
                 onClick={() => onAdd(cat.id)}
-                className="glass flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5 transition-transform active:scale-95"
+                className="flex shrink-0 items-center gap-2 rounded-full border border-[var(--border)] py-1.5 pl-1.5 pr-3.5 transition-transform active:scale-95"
               >
                 <span
                   className="flex h-6 w-6 items-center justify-center rounded-full"
@@ -185,6 +187,7 @@ export function HomeScreen({
           currency={currency}
           onEdit={onEdit}
           onDelete={onDelete}
+          onDuplicate={onDuplicate}
           emptyIcon={Receipt}
           emptyTitle={query ? 'No matches' : 'No expenses yet'}
           emptySubtitle={query ? 'Try a different search term.' : 'Log your first expense to get started.'}
