@@ -3,6 +3,7 @@ import { PieChart, ArrowUp, ArrowDown, Share2, Check } from 'lucide-react'
 import type { Expense } from '../types'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { EmptyState } from '../components/EmptyState'
+import { CategoryDonut } from '../components/CategoryDonut'
 import { CATEGORY_MAP } from '../data/categories'
 import { formatCurrency, formatMonthLabel } from '../lib/format'
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber'
@@ -117,7 +118,17 @@ export function StatsScreen({ expenses, currency, year, month, onMonthChange }: 
         )}
       </div>
 
-      <div className="mt-5 space-y-5">
+      {breakdown.length > 0 && (
+        <div className="mt-6">
+          <CategoryDonut
+            segments={breakdown.map(({ cat, amount }) => ({ color: cat.color, amount }))}
+            total={total}
+            currency={currency}
+          />
+        </div>
+      )}
+
+      <div className="mt-6 space-y-5">
         {breakdown.length === 0 && (
           <EmptyState icon={PieChart} title="Nothing to show" subtitle="Add expenses to see your breakdown." />
         )}
