@@ -186,7 +186,7 @@ export default function App() {
       : undefined
 
   return (
-    <div className="relative mx-auto flex min-h-dvh max-w-md flex-col overflow-hidden border-[var(--border)] bg-[var(--bg)] bg-wash text-[var(--text)] sm:my-4 sm:min-h-[calc(100dvh-2rem)] sm:border">
+    <div className="relative mx-auto flex min-h-dvh max-w-md flex-col overflow-hidden border-[var(--border-hard)] bg-[var(--bg)] bg-dither text-[var(--text)] sm:my-4 sm:min-h-[calc(100dvh-2rem)] sm:border-2">
       <div key={tab} className="relative z-10 flex-1 overflow-y-auto animate-tab-in">
         {tab === 'home' && (
           <HomeScreen

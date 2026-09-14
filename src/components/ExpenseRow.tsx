@@ -13,7 +13,10 @@ export function ExpenseRow({ expense, currency }: Props) {
 
   return (
     <div className="flex w-full items-center gap-3 bg-[var(--bg)] py-3 text-left">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface-2)]">
+      <span
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border-2"
+        style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--border-hard)' }}
+      >
         <Icon size={16} color={cat.color} strokeWidth={1.9} />
       </span>
       <span className="min-w-0 flex-1">

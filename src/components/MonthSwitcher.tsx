@@ -56,7 +56,7 @@ export function MonthSwitcher({ year, month, onChange }: Props) {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        className="w-40 select-none text-center text-[15px] font-semibold animate-fade-in"
+        className="w-40 select-none text-center text-[15px] font-semibold animate-pop-in"
         style={{ touchAction: 'pan-y' }}
       >
         {formatMonthLabel(year, month)}

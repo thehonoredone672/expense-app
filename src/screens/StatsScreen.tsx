@@ -4,6 +4,7 @@ import type { Expense } from '../types'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { EmptyState } from '../components/EmptyState'
 import { CategoryDonut } from '../components/CategoryDonut'
+import { SegmentedMeter } from '../components/SegmentedMeter'
 import { CATEGORY_MAP } from '../data/categories'
 import { formatCurrency, formatMonthLabel } from '../lib/format'
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber'
@@ -84,7 +85,7 @@ export function StatsScreen({ expenses, currency, year, month, onMonthChange }: 
 
   return (
     <div className="px-5 pb-6" style={{ paddingTop: 'calc(var(--safe-top) + 20px)' }}>
-      <div className="glass rounded-3xl px-5 py-5">
+      <div className="card-flat rounded-xl px-5 py-5">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[13px] font-medium text-[var(--text-muted)]">By category</p>
@@ -106,7 +107,7 @@ export function StatsScreen({ expenses, currency, year, month, onMonthChange }: 
         </div>
 
         {breakdown.length > 0 && (
-          <div className="mt-4 grid grid-cols-3 divide-x divide-[var(--border)] border-t border-[var(--border)] pt-3">
+          <div className="mt-4 grid grid-cols-3 divide-x-2 divide-[var(--border)] border-t-2 border-[var(--border)] pt-3">
             <Stat label="Daily avg" value={formatCurrency(dailyAverage, currency)} />
             <Stat
               label="Vs last month"
@@ -138,19 +139,17 @@ export function StatsScreen({ expenses, currency, year, month, onMonthChange }: 
           return (
             <div key={cat.id}>
               <div className="mb-2 flex items-center gap-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface-2)]">
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-[var(--border-hard)]"
+                  style={{ backgroundColor: 'var(--surface-2)' }}
+                >
                   <Icon size={15} color={cat.color} strokeWidth={1.9} />
                 </span>
                 <span className="flex-1 text-[14px] font-medium">{cat.label}</span>
                 <span className="text-[14px] font-semibold tabular-nums">{formatCurrency(amount, currency)}</span>
                 <span className="w-9 text-right text-[12.5px] text-[var(--text-muted)]">{pct}%</span>
               </div>
-              <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--surface-2)]">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{ width: `${pct}%`, backgroundColor: cat.color }}
-                />
-              </div>
+              <SegmentedMeter pct={pct} color={cat.color} segments={20} />
             </div>
           )
         })}

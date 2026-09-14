@@ -21,24 +21,22 @@ export function CategoryPicker({ value, onChange }: Props) {
               if (cat.id !== value) haptic('tick')
               onChange(cat.id)
             }}
-            className="flex flex-col items-center gap-1.5 transition-transform active:scale-90"
+            className="press-sm flex flex-col items-center gap-1.5"
           >
             <span
-              className={selected ? 'flex h-12 w-12 items-center justify-center rounded-full transition-all' : 'glass flex h-12 w-12 items-center justify-center rounded-full transition-all'}
-              style={
-                selected
-                  ? {
-                      background: `linear-gradient(155deg, color-mix(in srgb, ${cat.color} 100%, white 20%), ${cat.color})`,
-                      boxShadow: `0 6px 16px -4px ${cat.color}88`,
-                    }
-                  : undefined
-              }
+              key={`${cat.id}-${selected}`}
+              className="flex h-12 w-12 animate-pop-in items-center justify-center rounded-lg border-2"
+              style={{
+                backgroundColor: selected ? cat.color : 'var(--surface-2)',
+                borderColor: 'var(--border-hard)',
+                boxShadow: selected ? '2px 2px 0 var(--border-hard)' : undefined,
+              }}
             >
               <Icon size={19} color={selected ? '#fff' : cat.color} strokeWidth={2} />
             </span>
             <span
               className="text-[11px]"
-              style={{ color: selected ? 'var(--text)' : 'var(--text-muted)', fontWeight: selected ? 600 : 500 }}
+              style={{ color: selected ? 'var(--text)' : 'var(--text-muted)', fontWeight: selected ? 700 : 500 }}
             >
               {cat.label}
             </span>

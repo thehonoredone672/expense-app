@@ -65,7 +65,7 @@ export function ExpenseList({
           <p className="pb-1 text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
             {formatDateHeading(date)}
           </p>
-          <div className="divide-y divide-[var(--border)] border-t border-[var(--border)]">
+          <div className="divide-y-2 divide-[var(--border)] border-t-2 border-[var(--border)]">
             {items.map((expense) => (
               <SwipeToDelete
                 key={expense.id}

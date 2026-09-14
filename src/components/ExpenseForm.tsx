@@ -55,7 +55,7 @@ export function ExpenseForm({
   }
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-wash animate-sheet-up" style={handleStyle}>
+    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-dither animate-sheet-up" style={handleStyle}>
       <div {...handlers} style={{ touchAction: 'none', paddingTop: 'var(--safe-top)' }}>
         <SheetGrabber />
       </div>
@@ -65,9 +65,10 @@ export function ExpenseForm({
           type="button"
           onClick={onClose}
           aria-label="Cancel"
-          className="glass flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-muted)] transition-transform active:scale-90"
+          className="press-sm flex h-9 w-9 items-center justify-center rounded-lg border-2 border-[var(--border-hard)] bg-[var(--surface)] text-[var(--text)]"
+          style={{ boxShadow: '2px 2px 0 var(--border-hard)' }}
         >
-          <X size={19} />
+          <X size={18} />
         </button>
         <span {...handlers} style={{ touchAction: 'none' }} className="text-[15px] font-semibold">
           {initial ? 'Edit expense' : 'Add expense'}
@@ -77,8 +78,12 @@ export function ExpenseForm({
           onClick={handleSave}
           disabled={!canSave}
           aria-label="Save"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--accent-text)] transition-transform active:scale-90 disabled:opacity-40"
-          style={canSave ? { background: 'linear-gradient(155deg, var(--accent-1), var(--accent-2))' } : { backgroundColor: 'var(--surface-2)', color: 'var(--text-muted)' }}
+          className="press-sm flex h-9 w-9 items-center justify-center rounded-lg border-2 border-[var(--border-hard)] disabled:opacity-40"
+          style={{
+            backgroundColor: canSave ? 'var(--accent-2)' : 'var(--surface-2)',
+            color: canSave ? 'var(--accent-2-text)' : 'var(--text-muted)',
+            boxShadow: canSave ? '2px 2px 0 var(--border-hard)' : undefined,
+          }}
         >
           <Check size={18} strokeWidth={2.75} />
         </button>
@@ -87,7 +92,10 @@ export function ExpenseForm({
       <div className="flex-1 overflow-y-auto" style={dragging ? { overflow: 'hidden' } : undefined}>
         {tripId && tripName && (
           <div className="flex justify-center pt-4">
-            <span className="glass rounded-full px-3 py-1 text-[12px] font-medium text-[var(--text-muted)]">
+            <span
+              className="rounded-md border-2 border-[var(--border-hard)] px-3 py-1 text-[12px] font-medium"
+              style={{ backgroundColor: 'var(--surface-2)' }}
+            >
               Adding to {tripName}
             </span>
           </div>
@@ -107,10 +115,10 @@ export function ExpenseForm({
             onChange={(e) => setNote(e.target.value)}
             placeholder="Add a note (optional)"
             maxLength={60}
-            className="w-full border-b border-[var(--border)] bg-transparent py-2.5 text-[15px] outline-none placeholder:text-[var(--text-muted)]"
+            className="w-full border-b-2 border-[var(--border)] bg-transparent py-2.5 text-[15px] outline-none placeholder:text-[var(--text-muted)]"
           />
 
-          <label className="flex items-center gap-3 border-b border-[var(--border)] py-2.5">
+          <label className="flex items-center gap-3 border-b-2 border-[var(--border)] py-2.5">
             <CalendarDays size={17} className="text-[var(--text-muted)]" />
             <input
               type="date"
@@ -128,18 +136,17 @@ export function ExpenseForm({
                 haptic('tick')
                 setRecurring((r) => !r)
               }}
-              className="flex w-full items-center gap-3 border-b border-[var(--border)] py-2.5 text-left"
+              className="flex w-full items-center gap-3 border-b-2 border-[var(--border)] py-2.5 text-left"
             >
               <Repeat size={17} className="text-[var(--text-muted)]" />
               <span className="flex-1 text-[15px]">Repeat monthly</span>
               <span
-                className="relative h-6 w-10 shrink-0 rounded-full transition-colors"
-                style={{ backgroundColor: recurring ? undefined : 'var(--surface-2)' }}
+                className="relative h-6 w-10 shrink-0 rounded-full border-2 border-[var(--border-hard)] transition-colors"
+                style={{ backgroundColor: recurring ? 'var(--accent-2)' : 'var(--surface-2)' }}
               >
-                {recurring && <span className="accent-gradient absolute inset-0 rounded-full" />}
                 <span
-                  className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all"
-                  style={{ left: recurring ? 18 : 2 }}
+                  className="absolute top-0 h-4 w-4 rounded-full border-2 border-[var(--border-hard)] bg-[var(--surface)] transition-all"
+                  style={{ left: recurring ? 17 : 1 }}
                 />
               </span>
             </button>
@@ -159,7 +166,7 @@ export function ExpenseForm({
         </div>
       </div>
 
-      <div className="border-t border-[var(--border)]" style={{ paddingBottom: 'var(--safe-bottom)' }}>
+      <div className="border-t-2 border-[var(--border-hard)]" style={{ paddingBottom: 'var(--safe-bottom)' }}>
         <AmountKeypad value={amount} onChange={setAmount} />
       </div>
     </div>

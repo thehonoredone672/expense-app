@@ -4,6 +4,7 @@ import type { Expense, Trip } from '../types'
 import { TRIP_ICON_MAP } from '../data/tripIcons'
 import { ExpenseList } from '../components/ExpenseList'
 import { SheetGrabber } from '../components/SheetGrabber'
+import { SegmentedMeter } from '../components/SegmentedMeter'
 import { formatCurrency } from '../lib/format'
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber'
 import { useSheetDrag } from '../hooks/useSheetDrag'
@@ -41,7 +42,7 @@ export function TripDetailScreen({
   const { dragging, handleStyle, handlers } = useSheetDrag(onClose)
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-wash animate-sheet-up" style={handleStyle}>
+    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-dither animate-sheet-up" style={handleStyle}>
       <div {...handlers} style={{ touchAction: 'none', paddingTop: 'var(--safe-top)' }}>
         <SheetGrabber />
       </div>
@@ -51,9 +52,10 @@ export function TripDetailScreen({
           type="button"
           onClick={onClose}
           aria-label="Back to trips"
-          className="glass flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-muted)] transition-transform active:scale-90"
+          className="press-sm flex h-9 w-9 items-center justify-center rounded-lg border-2 border-[var(--border-hard)] bg-[var(--surface)] text-[var(--text)]"
+          style={{ boxShadow: '2px 2px 0 var(--border-hard)' }}
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={17} />
         </button>
         <span {...handlers} style={{ touchAction: 'none' }} className="text-[15px] font-semibold">
           Trip
@@ -62,17 +64,21 @@ export function TripDetailScreen({
           type="button"
           onClick={onAddExpense}
           aria-label="Add expense to trip"
-          className="accent-gradient flex h-9 w-9 items-center justify-center rounded-full text-[var(--accent-text)] transition-transform active:scale-90"
+          className="press-sm flex h-9 w-9 items-center justify-center rounded-lg border-2 border-[var(--border-hard)]"
+          style={{ backgroundColor: 'var(--accent-2)', color: 'var(--accent-2-text)', boxShadow: '2px 2px 0 var(--border-hard)' }}
         >
           <Plus size={19} strokeWidth={2.75} />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pb-6" style={dragging ? { overflow: 'hidden' } : undefined}>
-        <div className="glass rounded-3xl px-5 py-5">
+        <div className="card-flat rounded-xl px-5 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-2)]">
+              <span
+                className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-[var(--border-hard)]"
+                style={{ backgroundColor: 'var(--surface-2)' }}
+              >
                 <Icon size={18} color="var(--text)" strokeWidth={1.75} />
               </span>
               <span className="text-[17px] font-semibold">{trip.name}</span>
@@ -94,14 +100,8 @@ export function TripDetailScreen({
             <p className="text-4xl font-semibold tabular-nums" style={{ color: over ? 'var(--danger)' : undefined }}>
               {formatCurrency(animatedRemaining, currency)}
             </p>
-            <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-[var(--surface-2)]">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${pct}%`,
-                  background: over ? 'var(--danger)' : 'linear-gradient(90deg, var(--accent-1), var(--accent-2))',
-                }}
-              />
+            <div className="mt-3">
+              <SegmentedMeter pct={pct} color={over ? 'var(--danger)' : 'var(--accent-2)'} />
             </div>
             <p className="mt-1.5 text-[12.5px] text-[var(--text-muted)]">
               {formatCurrency(spent, currency)} spent of {formatCurrency(trip.budget, currency)} budget

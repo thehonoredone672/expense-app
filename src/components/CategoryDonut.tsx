@@ -29,7 +29,14 @@ export function CategoryDonut({ segments, total, currency }: Props) {
   return (
     <div className="relative mx-auto" style={{ width: SIZE, height: SIZE }}>
       <svg viewBox={`0 0 ${SIZE} ${SIZE}`} width={SIZE} height={SIZE} className="-rotate-90">
-        <circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} fill="none" stroke="var(--surface-2)" strokeWidth={STROKE} />
+        <circle
+          cx={SIZE / 2}
+          cy={SIZE / 2}
+          r={RADIUS}
+          fill="none"
+          stroke="var(--surface-2)"
+          strokeWidth={STROKE}
+        />
         {arcs.map((arc, idx) => (
           <circle
             key={idx}
@@ -39,11 +46,18 @@ export function CategoryDonut({ segments, total, currency }: Props) {
             fill="none"
             stroke={arc.color}
             strokeWidth={STROKE}
-            strokeLinecap="round"
             strokeDasharray={`${arc.length} ${CIRCUMFERENCE - arc.length}`}
             strokeDashoffset={-arc.offset}
           />
         ))}
+        <circle
+          cx={SIZE / 2}
+          cy={SIZE / 2}
+          r={RADIUS}
+          fill="none"
+          stroke="var(--border-hard)"
+          strokeWidth={2}
+        />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-[11px] font-medium text-[var(--text-muted)]">Total</span>

@@ -3,6 +3,7 @@ import { Receipt, Search, X, Repeat, Flame } from 'lucide-react'
 import type { CategoryId, Expense } from '../types'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { ExpenseList } from '../components/ExpenseList'
+import { SegmentedMeter } from '../components/SegmentedMeter'
 import { CATEGORY_MAP } from '../data/categories'
 import { formatCurrency } from '../lib/format'
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber'
@@ -88,7 +89,7 @@ export function HomeScreen({
 
   return (
     <div className="px-5 pb-6" style={{ paddingTop: 'calc(var(--safe-top) + 20px)' }}>
-      <div className="glass rounded-3xl px-5 py-5">
+      <div className="card-flat rounded-xl px-5 py-5">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[13px] font-medium text-[var(--text-muted)]">Total spent</p>
@@ -97,7 +98,7 @@ export function HomeScreen({
           <div className="flex shrink-0 items-center gap-2">
             {streak >= 2 && (
               <span
-                className="flex items-center gap-1 rounded-full border border-[var(--border)] px-2.5 py-1"
+                className="flex items-center gap-1 rounded-md border-2 border-[var(--border-hard)] px-2 py-1"
                 title={`${streak}-day logging streak`}
               >
                 <Flame size={13} className="animate-flicker" color="#f97316" fill="#f97316" />
@@ -117,15 +118,7 @@ export function HomeScreen({
 
         {budget != null && (
           <div className="mt-3">
-            <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--surface-2)]">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${budgetPct}%`,
-                  background: overBudget ? 'var(--danger)' : 'linear-gradient(90deg, var(--accent-1), var(--accent-2))',
-                }}
-              />
-            </div>
+            <SegmentedMeter pct={budgetPct} color={overBudget ? 'var(--danger)' : 'var(--accent-2)'} />
             <p className="mt-1.5 text-[12.5px] text-[var(--text-muted)]">
               {overBudget
                 ? `${formatCurrency(total - budget, currency)} over your ${formatCurrency(budget, currency)} budget`
@@ -142,7 +135,7 @@ export function HomeScreen({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search notes or categories"
-              className="w-full border-b border-[var(--border)] bg-transparent py-2 text-[15px] outline-none placeholder:text-[var(--text-muted)]"
+              className="w-full border-b-2 border-[var(--border)] bg-transparent py-2 text-[15px] outline-none placeholder:text-[var(--text-muted)]"
             />
           </div>
         )}
@@ -156,10 +149,13 @@ export function HomeScreen({
         <button
           type="button"
           onClick={() => onAddRecurring(pendingRecurring)}
-          className="glass mt-4 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-transform active:scale-[0.98]"
+          className="card-flat-sm press mt-4 flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left"
         >
-          <span className="accent-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
-            <Repeat size={16} color="#fff" />
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border-2 border-[var(--border-hard)]"
+            style={{ backgroundColor: 'var(--accent-2)' }}
+          >
+            <Repeat size={16} color="var(--accent-2-text)" />
           </span>
           <span className="flex-1">
             <span className="block text-[14px] font-semibold">
@@ -179,10 +175,11 @@ export function HomeScreen({
                 key={cat.id}
                 type="button"
                 onClick={() => onAdd(cat.id)}
-                className="flex shrink-0 items-center gap-2 rounded-full border border-[var(--border)] py-1.5 pl-1.5 pr-3.5 transition-transform active:scale-95"
+                className="press-sm flex shrink-0 items-center gap-2 rounded-lg border-2 border-[var(--border-hard)] py-1.5 pl-1.5 pr-3.5"
+                style={{ backgroundColor: 'var(--surface)' }}
               >
                 <span
-                  className="flex h-6 w-6 items-center justify-center rounded-full"
+                  className="flex h-6 w-6 items-center justify-center rounded"
                   style={{ backgroundColor: `${cat.color}22` }}
                 >
                   <Icon size={13} color={cat.color} strokeWidth={1.9} />

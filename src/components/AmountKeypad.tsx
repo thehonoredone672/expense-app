@@ -30,7 +30,7 @@ export function AmountKeypad({ value, onChange }: Props) {
           key={key}
           type="button"
           onClick={() => press(key)}
-          className="flex h-14 items-center justify-center rounded-xl text-2xl font-medium text-[var(--text)] transition-transform active:scale-95 active:bg-[var(--surface-2)]"
+          className="flex h-14 items-center justify-center rounded-lg text-2xl font-medium text-[var(--text)] transition-transform active:scale-95 active:bg-[var(--accent-soft)]"
         >
           {key === 'del' ? <Delete size={22} /> : key}
         </button>

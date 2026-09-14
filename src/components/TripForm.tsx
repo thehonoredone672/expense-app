@@ -37,7 +37,7 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
   }
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-wash animate-sheet-up" style={handleStyle}>
+    <div className="absolute inset-0 z-40 flex flex-col bg-[var(--bg)] bg-dither animate-sheet-up" style={handleStyle}>
       <div {...handlers} style={{ touchAction: 'none', paddingTop: 'var(--safe-top)' }}>
         <SheetGrabber />
       </div>
@@ -47,9 +47,10 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
           type="button"
           onClick={onClose}
           aria-label="Cancel"
-          className="glass flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-muted)] transition-transform active:scale-90"
+          className="press-sm flex h-9 w-9 items-center justify-center rounded-lg border-2 border-[var(--border-hard)] bg-[var(--surface)] text-[var(--text)]"
+          style={{ boxShadow: '2px 2px 0 var(--border-hard)' }}
         >
-          <X size={19} />
+          <X size={18} />
         </button>
         <span {...handlers} style={{ touchAction: 'none' }} className="text-[15px] font-semibold">
           {initial ? 'Edit trip' : 'New trip'}
@@ -59,8 +60,12 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
           onClick={handleSave}
           disabled={!canSave}
           aria-label="Save"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--accent-text)] transition-transform active:scale-90 disabled:opacity-40"
-          style={canSave ? { background: 'linear-gradient(155deg, var(--accent-1), var(--accent-2))' } : { backgroundColor: 'var(--surface-2)', color: 'var(--text-muted)' }}
+          className="press-sm flex h-9 w-9 items-center justify-center rounded-lg border-2 border-[var(--border-hard)] disabled:opacity-40"
+          style={{
+            backgroundColor: canSave ? 'var(--accent-2)' : 'var(--surface-2)',
+            color: canSave ? 'var(--accent-2-text)' : 'var(--text-muted)',
+            boxShadow: canSave ? '2px 2px 0 var(--border-hard)' : undefined,
+          }}
         >
           <Check size={18} strokeWidth={2.75} />
         </button>
@@ -81,7 +86,7 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
             placeholder="Trip name, e.g. Japan"
             maxLength={40}
             autoFocus
-            className="w-full border-b border-[var(--border)] bg-transparent py-2.5 text-center text-[16px] font-medium outline-none placeholder:text-[var(--text-muted)] placeholder:font-normal"
+            className="w-full border-b-2 border-[var(--border)] bg-transparent py-2.5 text-center text-[16px] font-medium outline-none placeholder:text-[var(--text-muted)] placeholder:font-normal"
           />
         </div>
 
@@ -96,20 +101,17 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
                   if (id !== icon) haptic('tick')
                   setIcon(id)
                 }}
-                className="flex items-center justify-center py-1 transition-transform active:scale-90"
+                className="press-sm flex items-center justify-center py-1"
               >
                 <span
-                  className={selected ? 'flex h-12 w-12 items-center justify-center rounded-full transition-all' : 'glass flex h-12 w-12 items-center justify-center rounded-full transition-all'}
-                  style={
-                    selected
-                      ? {
-                          background: 'linear-gradient(155deg, var(--accent-1), var(--accent-2))',
-                          boxShadow: '0 6px 16px -4px rgba(79, 70, 229, 0.5)',
-                        }
-                      : undefined
-                  }
+                  key={`${id}-${selected}`}
+                  className="flex h-12 w-12 animate-pop-in items-center justify-center rounded-lg border-2 border-[var(--border-hard)]"
+                  style={{
+                    backgroundColor: selected ? 'var(--accent-2)' : 'var(--surface-2)',
+                    boxShadow: selected ? '2px 2px 0 var(--border-hard)' : undefined,
+                  }}
                 >
-                  <Icon size={20} color={selected ? '#fff' : 'var(--text-muted)'} strokeWidth={1.85} />
+                  <Icon size={20} color={selected ? 'var(--accent-2-text)' : 'var(--text-muted)'} strokeWidth={1.85} />
                 </span>
               </button>
             )
@@ -131,7 +133,7 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
         )}
       </div>
 
-      <div className="border-t border-[var(--border)]" style={{ paddingBottom: 'var(--safe-bottom)' }}>
+      <div className="border-t-2 border-[var(--border-hard)]" style={{ paddingBottom: 'var(--safe-bottom)' }}>
         <AmountKeypad value={budget} onChange={setBudget} />
       </div>
     </div>

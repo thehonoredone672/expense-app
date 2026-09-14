@@ -1,6 +1,7 @@
 import type { Trip } from '../types'
 import { TRIP_ICON_MAP } from '../data/tripIcons'
 import { formatCurrency } from '../lib/format'
+import { SegmentedMeter } from './SegmentedMeter'
 
 interface Props {
   trip: Trip
@@ -21,7 +22,10 @@ export function TripCard({ trip, spent, currency, onClick }: Props) {
       onClick={onClick}
       className="flex w-full items-center gap-3.5 py-3.5 text-left transition-opacity active:opacity-60"
     >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--surface-2)]">
+      <span
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border-2 border-[var(--border-hard)]"
+        style={{ backgroundColor: 'var(--surface-2)' }}
+      >
         <Icon size={19} color="var(--text)" strokeWidth={1.75} />
       </span>
       <div className="min-w-0 flex-1">
@@ -34,14 +38,8 @@ export function TripCard({ trip, spent, currency, onClick }: Props) {
             {over ? `${formatCurrency(-remaining, currency)} over` : `${formatCurrency(remaining, currency)} left`}
           </span>
         </div>
-        <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-[var(--surface-2)]">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{
-              width: `${pct}%`,
-              background: over ? 'var(--danger)' : 'linear-gradient(90deg, var(--accent-1), var(--accent-2))',
-            }}
-          />
+        <div className="mt-2">
+          <SegmentedMeter pct={pct} color={over ? 'var(--danger)' : 'var(--accent-2)'} segments={12} />
         </div>
         <p className="mt-1.5 text-[12.5px] text-[var(--text-muted)]">
           {formatCurrency(spent, currency)} of {formatCurrency(trip.budget, currency)}

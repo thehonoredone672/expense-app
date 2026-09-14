@@ -37,7 +37,7 @@ export function TripsScreen({ trips, expenses, currency, onSelect, onNewTrip }: 
           onAction={onNewTrip}
         />
       ) : (
-        <div className="divide-y divide-[var(--border)] border-t border-[var(--border)]">
+        <div className="divide-y-2 divide-[var(--border)] border-t-2 border-[var(--border)]">
           {sortedTrips.map((trip) => (
             <TripCard
               key={trip.id}

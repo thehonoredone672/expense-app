@@ -2,47 +2,39 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg: #fafafc;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f2f2f5;
-  --text: #111113;
-  --text-muted: #8a8a92;
-  --border: #e8e8ec;
-  --accent-1: #818cf8;
-  --accent-2: #4f46e5;
-  --accent: #4f46e5;
+  --surface-2: #efefef;
+  --text: #0a0a0a;
+  --text-muted: #6b6b6b;
+  --border: #dcdcdc;
+  --border-hard: #0a0a0a;
+  --accent: #4338ca;
+  --accent-soft: #e7e4fc;
   --accent-text: #ffffff;
-  --danger: #d92d20;
+  --accent-2: #c6f135;
+  --accent-2-text: #0a0a0a;
+  --danger: #e0242f;
+  --dither: rgba(10, 10, 10, 0.055);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
-
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.7);
-  --glass-shadow: 0 8px 30px -12px rgba(30, 30, 60, 0.18);
-
-  --wash: radial-gradient(120% 70% at 15% -10%, rgba(129, 140, 248, 0.14), transparent 55%),
-    radial-gradient(100% 60% at 100% 0%, rgba(99, 102, 241, 0.09), transparent 50%);
 }
 
 .dark {
-  --bg: #050506;
-  --surface: #0d0d10;
-  --surface-2: #1a1a1e;
-  --text: #f5f5f7;
-  --text-muted: #8e8e93;
-  --border: #232327;
-  --accent-1: #a5b4fc;
-  --accent-2: #818cf8;
-  --accent: #818cf8;
-  --accent-text: #08080b;
-  --danger: #ff453a;
-
-  --glass-bg: rgba(24, 24, 30, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.55);
-
-  --wash: radial-gradient(120% 70% at 15% -10%, rgba(99, 102, 241, 0.22), transparent 55%),
-    radial-gradient(100% 60% at 100% 0%, rgba(129, 140, 248, 0.12), transparent 50%);
+  --bg: #0a0a0a;
+  --surface: #0a0a0a;
+  --surface-2: #1c1c1c;
+  --text: #f5f5f5;
+  --text-muted: #9a9a9a;
+  --border: #2a2a2a;
+  --border-hard: #f5f5f5;
+  --accent: #8b85f0;
+  --accent-soft: #201c4a;
+  --accent-text: #0a0a0a;
+  --accent-2: #c6f135;
+  --accent-2-text: #0a0a0a;
+  --danger: #ff5a5f;
+  --dither: rgba(245, 245, 245, 0.06);
 }
 
 * {
@@ -77,29 +69,54 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-2, var(--accent));
+  outline: 2px solid var(--accent-2);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar {
   display: none;
 }
 
-.bg-wash {
-  background-image: var(--wash);
+/* ---------- 1-bit surface system ---------- */
+
+.card-flat {
+  background: var(--surface);
+  border: 2px solid var(--border-hard);
+  box-shadow: 4px 4px 0 var(--border-hard);
 }
 
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(18px) saturate(150%);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+.card-flat-sm {
+  background: var(--surface);
+  border: 1.5px solid var(--border-hard);
+  box-shadow: 3px 3px 0 var(--border-hard);
 }
 
-.accent-gradient {
-  background: linear-gradient(155deg, var(--accent-1), var(--accent-2));
+.press {
+  transition: transform 110ms ease-out, box-shadow 110ms ease-out;
+}
+
+.press:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--border-hard);
+}
+
+.press-sm:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--border-hard);
+}
+
+.bg-dither {
+  background-image: repeating-conic-gradient(var(--dither) 0% 25%, transparent 0% 50%);
+  background-size: 5px 5px;
+  animation: dither-shift 7s steps(2) infinite;
+}
+
+/* ---------- animations ---------- */
+
+@keyframes dither-shift {
+  0%, 100% { background-position: 0 0; }
+  50% { background-position: 5px 5px; }
 }
 
 @keyframes sheet-up {
@@ -121,12 +138,13 @@ button {
 }
 
 @keyframes pop-in {
-  from { opacity: 0; transform: scale(0.94); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.8) rotate(-4deg); }
+  60% { transform: scale(1.08) rotate(2deg); }
+  to { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
 .animate-pop-in {
-  animation: pop-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pop-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes tab-in {
@@ -158,8 +176,33 @@ button {
   animation: flame-flicker 1.6s ease-in-out infinite;
 }
 
+@keyframes blink-caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-caret {
+  animation: blink-caret 1s steps(1) infinite;
+}
+
+@keyframes marching {
+  to { background-position: 8px 0; }
+}
+
+.animate-marching {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--border-hard) 0,
+    var(--border-hard) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  animation: marching 0.5s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-sheet-up, .animate-fade-in, .animate-pop-in, .animate-tab-in, .animate-flicker {
+  .animate-sheet-up, .animate-fade-in, .animate-pop-in, .animate-tab-in, .animate-flicker,
+  .animate-caret, .animate-marching, .bg-dither {
     animation: none;
   }
   [style*="pixel-pop"], [style*="spark-fade"] {

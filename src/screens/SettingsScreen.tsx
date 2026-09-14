@@ -52,7 +52,7 @@ export function SettingsScreen({
 
       <section>
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Appearance</p>
-        <div className="flex gap-1 rounded-xl border border-[var(--border)] p-1">
+        <div className="flex gap-1.5 rounded-lg border-2 border-[var(--border-hard)] p-1">
           {THEME_OPTIONS.map((opt) => {
             const selected = settings.theme === opt.value
             return (
@@ -60,8 +60,11 @@ export function SettingsScreen({
                 key={opt.value}
                 type="button"
                 onClick={() => onUpdate({ theme: opt.value })}
-                className={(selected ? 'accent-gradient ' : '') + 'flex-1 rounded-lg py-2 text-[13.5px] font-medium transition-all'}
-                style={{ color: selected ? 'var(--accent-text)' : 'var(--text-muted)' }}
+                className="flex-1 rounded py-2 text-[13.5px] font-semibold transition-all"
+                style={{
+                  backgroundColor: selected ? 'var(--accent-2)' : 'transparent',
+                  color: selected ? 'var(--accent-2-text)' : 'var(--text-muted)',
+                }}
               >
                 {opt.label}
               </button>
@@ -80,11 +83,12 @@ export function SettingsScreen({
                 key={code}
                 type="button"
                 onClick={() => onUpdate({ currency: code })}
-                className={
-                  (selected ? 'accent-gradient border-transparent ' : 'border-[var(--border)] ') +
-                  'flex items-center justify-center gap-1 rounded-lg border py-2.5 text-[13.5px] font-semibold transition-all active:opacity-70'
-                }
-                style={{ color: selected ? 'var(--accent-text)' : 'var(--text)' }}
+                className="press-sm flex items-center justify-center gap-1 rounded-lg border-2 border-[var(--border-hard)] py-2.5 text-[13.5px] font-semibold"
+                style={{
+                  backgroundColor: selected ? 'var(--accent-2)' : 'var(--surface)',
+                  color: selected ? 'var(--accent-2-text)' : 'var(--text)',
+                  boxShadow: selected ? '2px 2px 0 var(--border-hard)' : undefined,
+                }}
               >
                 {selected && <Check size={13} strokeWidth={3} />}
                 {code}
@@ -98,7 +102,7 @@ export function SettingsScreen({
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
           Monthly budget
         </p>
-        <div className="flex items-center gap-2 border-b border-[var(--border)] py-2.5">
+        <div className="flex items-center gap-2 border-b-2 border-[var(--border)] py-2.5">
           <span className="text-[15px] text-[var(--text-muted)]">{getCurrencySymbol(settings.currency)}</span>
           <input
             type="number"
@@ -115,7 +119,7 @@ export function SettingsScreen({
 
       <section>
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Backup</p>
-        <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+        <div className="divide-y-2 divide-[var(--border)] border-y-2 border-[var(--border)]">
           <button
             type="button"
             onClick={onExportJSON}
@@ -162,7 +166,7 @@ export function SettingsScreen({
           type="button"
           onClick={handleClear}
           disabled={expenseCount === 0}
-          className="flex w-full items-center gap-2 border-y border-[var(--border)] py-3 text-[14.5px] font-medium transition-opacity active:opacity-60 disabled:opacity-40"
+          className="flex w-full items-center gap-2 border-y-2 border-[var(--border)] py-3 text-[14.5px] font-medium transition-opacity active:opacity-60 disabled:opacity-40"
           style={{ color: 'var(--danger)' }}
           onBlur={() => setConfirming(false)}
         >
