@@ -1,11 +1,18 @@
 import { useRef, useState } from 'react'
-import { Trash2, Check, Download, Upload, FileSpreadsheet } from 'lucide-react'
+import { Trash2, Check, Download, Upload, FileSpreadsheet, BellRing } from 'lucide-react'
 import type { Settings, ThemePreference } from '../types'
 import { CURRENCIES, getCurrencySymbol } from '../lib/format'
+import {
+  getNotificationPermission,
+  notificationsSupported,
+  requestNotificationPermission,
+  sendNotification,
+} from '../lib/notifications'
 
 interface Props {
   settings: Settings
   expenseCount: number
+  debtCount: number
   onUpdate: (patch: Partial<Settings>) => void
   onClearAll: () => void
   onExportJSON: () => void
@@ -22,6 +29,7 @@ const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
 export function SettingsScreen({
   settings,
   expenseCount,
+  debtCount,
   onUpdate,
   onClearAll,
   onExportJSON,
@@ -30,7 +38,9 @@ export function SettingsScreen({
 }: Props) {
   const [confirming, setConfirming] = useState(false)
   const [budgetInput, setBudgetInput] = useState(settings.budget != null ? String(settings.budget) : '')
+  const [permission, setPermission] = useState(getNotificationPermission())
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const totalCount = expenseCount + debtCount
 
   function handleClear() {
     if (!confirming) {
@@ -39,6 +49,22 @@ export function SettingsScreen({
     }
     onClearAll()
     setConfirming(false)
+  }
+
+  async function handleToggleNotifications() {
+    if (settings.notificationsEnabled) {
+      onUpdate({ notificationsEnabled: false })
+      return
+    }
+    if (!notificationsSupported()) return
+    const result = await requestNotificationPermission()
+    setPermission(result)
+    if (result === 'granted') {
+      onUpdate({ notificationsEnabled: true })
+      sendNotification('Notifications on', {
+        body: "We'll let you know about your budget, recurring bills, and debts that are due.",
+      })
+    }
   }
 
   function commitBudget() {
@@ -118,12 +144,43 @@ export function SettingsScreen({
       </section>
 
       <section>
+        <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Notifications</p>
+        <button
+          type="button"
+          onClick={handleToggleNotifications}
+          disabled={!notificationsSupported() || permission === 'denied'}
+          className="flex w-full items-center gap-3 border-y-2 border-[var(--border)] py-3 text-left disabled:opacity-40"
+        >
+          <BellRing size={17} className="text-[var(--text-muted)]" />
+          <span className="flex-1">
+            <span className="block text-[14.5px] font-medium">Budget, bill &amp; debt alerts</span>
+            <span className="block text-[12.5px] text-[var(--text-muted)]">
+              {!notificationsSupported()
+                ? 'Not supported on this browser'
+                : permission === 'denied'
+                  ? 'Blocked — allow notifications in your browser settings'
+                  : 'Get notified when you near your budget, a bill is due, or a debt is due'}
+            </span>
+          </span>
+          <span
+            className="relative h-6 w-10 shrink-0 rounded-full border-2 border-[var(--border-hard)] transition-colors"
+            style={{ backgroundColor: settings.notificationsEnabled ? 'var(--accent-2)' : 'var(--surface-2)' }}
+          >
+            <span
+              className="absolute top-0 h-4 w-4 rounded-full border-2 border-[var(--border-hard)] bg-[var(--surface)] transition-all"
+              style={{ left: settings.notificationsEnabled ? 17 : 1 }}
+            />
+          </span>
+        </button>
+      </section>
+
+      <section>
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Backup</p>
         <div className="divide-y-2 divide-[var(--border)] border-y-2 border-[var(--border)]">
           <button
             type="button"
             onClick={onExportJSON}
-            disabled={expenseCount === 0}
+            disabled={totalCount === 0}
             className="flex w-full items-center gap-3 py-3 text-[14.5px] font-medium transition-opacity active:opacity-60 disabled:opacity-40"
           >
             <Download size={16} className="text-[var(--text-muted)]" />
@@ -165,13 +222,13 @@ export function SettingsScreen({
         <button
           type="button"
           onClick={handleClear}
-          disabled={expenseCount === 0}
+          disabled={totalCount === 0}
           className="flex w-full items-center gap-2 border-y-2 border-[var(--border)] py-3 text-[14.5px] font-medium transition-opacity active:opacity-60 disabled:opacity-40"
           style={{ color: 'var(--danger)' }}
           onBlur={() => setConfirming(false)}
         >
           <Trash2 size={16} />
-          {confirming ? 'Tap again to confirm' : `Clear all data (${expenseCount})`}
+          {confirming ? 'Tap again to confirm' : `Clear all data (${totalCount})`}
         </button>
       </section>
 

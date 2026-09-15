@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CategoryId, Expense, Trip } from './types'
+import type { CategoryId, Debt, Expense, Trip } from './types'
 import { useExpenses } from './hooks/useExpenses'
 import { useTrips } from './hooks/useTrips'
+import { useDebts } from './hooks/useDebts'
 import { useSettings } from './hooks/useSettings'
+import { useReminders } from './hooks/useReminders'
 import { BottomNav, type Tab } from './components/BottomNav'
 import { ExpenseForm } from './components/ExpenseForm'
 import { TripForm } from './components/TripForm'
+import { DebtForm } from './components/DebtForm'
 import { Toast } from './components/Toast'
 import { HomeScreen } from './screens/HomeScreen'
 import { TripsScreen } from './screens/TripsScreen'
 import { TripDetailScreen } from './screens/TripDetailScreen'
+import { DebtsScreen } from './screens/DebtsScreen'
 import { StatsScreen } from './screens/StatsScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { getCurrencySymbol, todayISO } from './lib/format'
@@ -23,7 +27,10 @@ export default function App() {
   const { expenses, addExpense, updateExpense, deleteExpense, clearAll, importExpenses, unassignTrip } =
     useExpenses()
   const { trips, addTrip, updateTrip, deleteTrip, importTrips } = useTrips()
+  const { debts, addDebt, updateDebt, deleteDebt, setSettled, clearAll: clearAllDebts, importDebts } = useDebts()
   const { settings, updateSettings } = useSettings()
+
+  useReminders(expenses, debts, settings)
 
   const [tab, setTab] = useState<Tab>('home')
   const now = new Date()
@@ -38,6 +45,9 @@ export default function App() {
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
   const [tripFormOpen, setTripFormOpen] = useState(false)
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null)
+
+  const [debtFormOpen, setDebtFormOpen] = useState(false)
+  const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
 
   const [toast, setToast] = useState<string | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -86,6 +96,11 @@ export default function App() {
         setEditingTrip(null)
         setTripFormOpen(true)
       }
+      return
+    }
+    if (tab === 'debts') {
+      setEditingDebt(null)
+      setDebtFormOpen(true)
       return
     }
     openAdd()
@@ -164,18 +179,54 @@ export default function App() {
     if (selectedTripId === id) setSelectedTripId(null)
   }
 
+  function openEditDebt(debt: Debt) {
+    setEditingDebt(debt)
+    setDebtFormOpen(true)
+  }
+
+  function closeDebtForm() {
+    setDebtFormOpen(false)
+  }
+
+  function handleSaveDebt(data: Omit<Debt, 'id' | 'createdAt'>) {
+    if (editingDebt) {
+      updateDebt(editingDebt.id, data)
+    } else {
+      addDebt(data)
+      celebration.fire()
+    }
+    setDebtFormOpen(false)
+  }
+
+  function handleDeleteDebt(id: string) {
+    deleteDebt(id)
+    if (editingDebt?.id === id) setDebtFormOpen(false)
+  }
+
+  function handleToggleSettled(debt: Debt) {
+    haptic(debt.settled ? 'tick' : 'success')
+    setSettled(debt.id, !debt.settled)
+  }
+
   async function handleImportFile(file: File) {
     try {
       const imported = await readBackupFile(file)
       importExpenses(imported.expenses)
       importTrips(imported.trips)
+      importDebts(imported.debts)
       const parts = []
       if (imported.expenses.length) parts.push(`${imported.expenses.length} expense${imported.expenses.length === 1 ? '' : 's'}`)
       if (imported.trips.length) parts.push(`${imported.trips.length} trip${imported.trips.length === 1 ? '' : 's'}`)
-      showToast(`Imported ${parts.join(' and ')}`)
+      if (imported.debts.length) parts.push(`${imported.debts.length} debt${imported.debts.length === 1 ? '' : 's'}`)
+      showToast(`Imported ${parts.join(', ')}`)
     } catch {
       showToast('Could not read that file')
     }
+  }
+
+  function handleClearAll() {
+    clearAll()
+    clearAllDebts()
   }
 
   const activeTrip = selectedTripId ? (trips.find((t) => t.id === selectedTripId) ?? null) : null
@@ -191,6 +242,7 @@ export default function App() {
         {tab === 'home' && (
           <HomeScreen
             expenses={expenses}
+            debts={debts}
             currency={settings.currency}
             budget={settings.budget}
             year={year}
@@ -201,6 +253,7 @@ export default function App() {
             onDelete={handleDelete}
             onDuplicate={handleDuplicate}
             onAddRecurring={handleAddRecurring}
+            onOpenDebts={() => setTab('debts')}
           />
         )}
         {tab === 'trips' && (
@@ -212,6 +265,19 @@ export default function App() {
             onNewTrip={() => {
               setEditingTrip(null)
               setTripFormOpen(true)
+            }}
+          />
+        )}
+        {tab === 'debts' && (
+          <DebtsScreen
+            debts={debts}
+            currency={settings.currency}
+            onEdit={openEditDebt}
+            onDelete={handleDeleteDebt}
+            onToggleSettled={handleToggleSettled}
+            onNewDebt={() => {
+              setEditingDebt(null)
+              setDebtFormOpen(true)
             }}
           />
         )}
@@ -228,9 +294,10 @@ export default function App() {
           <SettingsScreen
             settings={settings}
             expenseCount={expenses.length}
+            debtCount={debts.length}
             onUpdate={updateSettings}
-            onClearAll={clearAll}
-            onExportJSON={() => exportJSON(expenses, trips, settings)}
+            onClearAll={handleClearAll}
+            onExportJSON={() => exportJSON(expenses, trips, debts, settings)}
             onExportCSV={() => exportCSV(expenses, trips)}
             onImportFile={handleImportFile}
           />
@@ -263,6 +330,16 @@ export default function App() {
           onClose={closeTripForm}
           onSave={handleSaveTrip}
           onDelete={handleDeleteTrip}
+        />
+      )}
+
+      {debtFormOpen && (
+        <DebtForm
+          initial={editingDebt}
+          currencySymbol={getCurrencySymbol(settings.currency)}
+          onClose={closeDebtForm}
+          onSave={handleSaveDebt}
+          onDelete={handleDeleteDebt}
         />
       )}
 

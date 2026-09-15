@@ -11,10 +11,19 @@ interface Props {
   onDelete: () => void
   onTap: () => void
   onLongPress?: () => void
+  deleteLabel?: string
   children: ReactNode
 }
 
-export function SwipeToDelete({ isOpen, onOpenChange, onDelete, onTap, onLongPress, children }: Props) {
+export function SwipeToDelete({
+  isOpen,
+  onOpenChange,
+  onDelete,
+  onTap,
+  onLongPress,
+  deleteLabel = 'Delete item',
+  children,
+}: Props) {
   const [dragging, setDragging] = useState(false)
   const [dragX, setDragX] = useState(0)
   const [pressing, setPressing] = useState(false)
@@ -104,7 +113,7 @@ export function SwipeToDelete({ isOpen, onOpenChange, onDelete, onTap, onLongPre
         <button
           type="button"
           onClick={handleDeleteClick}
-          aria-label="Delete expense"
+          aria-label={deleteLabel}
           className="flex h-full w-full items-center justify-center"
           style={{ backgroundColor: 'var(--danger)' }}
         >

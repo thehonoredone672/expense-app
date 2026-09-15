@@ -1,7 +1,7 @@
-import { Home, PieChart, Settings, Plus, Plane } from 'lucide-react'
+import { Home, PieChart, Settings, Plus, Plane, HandCoins } from 'lucide-react'
 import { haptic } from '../lib/haptics'
 
-export type Tab = 'home' | 'trips' | 'stats' | 'settings'
+export type Tab = 'home' | 'trips' | 'debts' | 'stats' | 'settings'
 
 interface Props {
   active: Tab
@@ -20,9 +20,10 @@ export function BottomNav({ active, onChange, onAdd }: Props) {
       className="sticky bottom-0 z-30 border-t-2 border-[var(--border-hard)] bg-[var(--bg)]"
       style={{ paddingBottom: 'var(--safe-bottom)' }}
     >
-      <div className="relative mx-auto grid max-w-md grid-cols-4 items-center px-2">
+      <div className="relative mx-auto grid max-w-md grid-cols-5 items-center px-1">
         <NavButton label="Home" icon={Home} isActive={active === 'home'} onClick={() => selectTab('home')} />
         <NavButton label="Trips" icon={Plane} isActive={active === 'trips'} onClick={() => selectTab('trips')} />
+        <NavButton label="Debts" icon={HandCoins} isActive={active === 'debts'} onClick={() => selectTab('debts')} />
         <NavButton label="Stats" icon={PieChart} isActive={active === 'stats'} onClick={() => selectTab('stats')} />
         <NavButton
           label="Settings"

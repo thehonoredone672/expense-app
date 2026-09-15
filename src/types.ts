@@ -35,4 +35,19 @@ export interface Settings {
   currency: string
   theme: ThemePreference
   budget: number | null
+  notificationsEnabled: boolean
+}
+
+/** 'they_owe' = someone owes the user money; 'i_owe' = the user owes someone money. */
+export type DebtDirection = 'they_owe' | 'i_owe'
+
+export interface Debt {
+  id: string
+  person: string
+  amount: number
+  direction: DebtDirection
+  note: string
+  dueDate: string | null // yyyy-mm-dd
+  settled: boolean
+  createdAt: number
 }

@@ -1,4 +1,4 @@
-import type { Expense, Settings, Trip } from '../types'
+import type { Debt, Expense, Settings, Trip } from '../types'
 import { CATEGORY_MAP } from '../data/categories'
 import { todayISO } from './format'
 
@@ -12,8 +12,8 @@ function download(filename: string, content: string, mime: string) {
   URL.revokeObjectURL(url)
 }
 
-export function exportJSON(expenses: Expense[], trips: Trip[], settings: Settings) {
-  const payload = { version: 2, exportedAt: new Date().toISOString(), settings, expenses, trips }
+export function exportJSON(expenses: Expense[], trips: Trip[], debts: Debt[], settings: Settings) {
+  const payload = { version: 3, exportedAt: new Date().toISOString(), settings, expenses, trips, debts }
   download(`expensify-backup-${todayISO()}.json`, JSON.stringify(payload, null, 2), 'application/json')
 }
 
@@ -66,7 +66,22 @@ function isValidTrip(value: unknown): value is Trip {
   )
 }
 
-export async function readBackupFile(file: File): Promise<{ expenses: Expense[]; trips: Trip[] }> {
+function isValidDebt(value: unknown): value is Debt {
+  if (!value || typeof value !== 'object') return false
+  const d = value as Record<string, unknown>
+  return (
+    typeof d.id === 'string' &&
+    typeof d.person === 'string' &&
+    typeof d.amount === 'number' &&
+    (d.direction === 'they_owe' || d.direction === 'i_owe') &&
+    typeof d.note === 'string' &&
+    (d.dueDate === null || typeof d.dueDate === 'string') &&
+    typeof d.settled === 'boolean' &&
+    typeof d.createdAt === 'number'
+  )
+}
+
+export async function readBackupFile(file: File): Promise<{ expenses: Expense[]; trips: Trip[]; debts: Debt[] }> {
   const text = await file.text()
   const parsed = JSON.parse(text)
   const expenseList = Array.isArray(parsed) ? parsed : parsed.expenses
@@ -74,6 +89,8 @@ export async function readBackupFile(file: File): Promise<{ expenses: Expense[];
   const expenses = expenseList.filter(isValidExpense)
   const tripList = Array.isArray(parsed?.trips) ? parsed.trips : []
   const trips = tripList.filter(isValidTrip)
-  if (expenses.length === 0 && trips.length === 0) throw new Error('File contained no valid data')
-  return { expenses, trips }
+  const debtList = Array.isArray(parsed?.debts) ? parsed.debts : []
+  const debts = debtList.filter(isValidDebt)
+  if (expenses.length === 0 && trips.length === 0 && debts.length === 0) throw new Error('File contained no valid data')
+  return { expenses, trips, debts }
 }

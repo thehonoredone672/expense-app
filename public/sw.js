@@ -13,6 +13,18 @@ self.addEventListener('activate', (event) => {
   )
 })
 
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ('focus' in client) return client.focus()
+      }
+      return self.clients.openWindow(self.registration.scope)
+    }),
+  )
+})
+
 // Network-first so a deploy is always picked up when online; falls back to
 // the last cached response (or the app shell) when offline.
 self.addEventListener('fetch', (event) => {

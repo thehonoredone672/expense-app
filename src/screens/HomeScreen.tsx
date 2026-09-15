@@ -1,17 +1,18 @@
 import { useMemo, useState } from 'react'
-import { Receipt, Search, X, Repeat, Flame } from 'lucide-react'
-import type { CategoryId, Expense } from '../types'
+import { Receipt, Search, X, Repeat, Flame, HandCoins } from 'lucide-react'
+import type { CategoryId, Debt, Expense } from '../types'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { ExpenseList } from '../components/ExpenseList'
 import { SegmentedMeter } from '../components/SegmentedMeter'
 import { CATEGORY_MAP } from '../data/categories'
-import { formatCurrency } from '../lib/format'
+import { formatCurrency, todayISO } from '../lib/format'
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber'
 import { getPendingRecurring } from '../lib/recurring'
 import { computeStreak } from '../lib/streak'
 
 interface Props {
   expenses: Expense[]
+  debts: Debt[]
   currency: string
   budget: number | null
   year: number
@@ -22,10 +23,12 @@ interface Props {
   onDelete: (id: string) => void
   onDuplicate: (expense: Expense) => void
   onAddRecurring: (pending: ReturnType<typeof getPendingRecurring>) => void
+  onOpenDebts: () => void
 }
 
 export function HomeScreen({
   expenses,
+  debts,
   currency,
   budget,
   year,
@@ -36,6 +39,7 @@ export function HomeScreen({
   onDelete,
   onDuplicate,
   onAddRecurring,
+  onOpenDebts,
 }: Props) {
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -61,6 +65,10 @@ export function HomeScreen({
   const total = monthExpenses.reduce((sum, e) => sum + e.amount, 0)
   const animatedTotal = useAnimatedNumber(total)
   const streak = useMemo(() => computeStreak(expenses), [expenses])
+  const dueDebts = useMemo(() => {
+    const today = todayISO()
+    return debts.filter((d) => !d.settled && d.dueDate && d.dueDate <= today)
+  }, [debts])
 
   const quickCategories = useMemo(() => {
     const counts = new Map<CategoryId, number>()
@@ -162,6 +170,27 @@ export function HomeScreen({
               {pendingRecurring.length} recurring bill{pendingRecurring.length === 1 ? '' : 's'} due
             </span>
             <span className="block text-[12.5px] text-[var(--text-muted)]">Tap to add this month's amounts</span>
+          </span>
+        </button>
+      )}
+
+      {dueDebts.length > 0 && (
+        <button
+          type="button"
+          onClick={onOpenDebts}
+          className="card-flat-sm press mt-4 flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left"
+        >
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border-2 border-[var(--border-hard)]"
+            style={{ backgroundColor: 'var(--danger)' }}
+          >
+            <HandCoins size={16} color="#fff" />
+          </span>
+          <span className="flex-1">
+            <span className="block text-[14px] font-semibold">
+              {dueDebts.length} debt{dueDebts.length === 1 ? '' : 's'} due or overdue
+            </span>
+            <span className="block text-[12.5px] text-[var(--text-muted)]">Tap to review</span>
           </span>
         </button>
       )}

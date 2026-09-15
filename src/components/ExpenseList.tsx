@@ -74,6 +74,7 @@ export function ExpenseList({
                 onDelete={() => onDelete(expense.id)}
                 onTap={() => onEdit(expense)}
                 onLongPress={onDuplicate ? () => onDuplicate(expense) : undefined}
+                deleteLabel="Delete expense"
               >
                 <ExpenseRow expense={expense} currency={currency} />
               </SwipeToDelete>

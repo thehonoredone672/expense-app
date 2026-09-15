@@ -1,13 +1,15 @@
-import type { Expense, Settings, Trip } from '../types'
+import type { Debt, Expense, Settings, Trip } from '../types'
 
 const EXPENSES_KEY = 'centsible.expenses.v1'
 const SETTINGS_KEY = 'centsible.settings.v1'
 const TRIPS_KEY = 'centsible.trips.v1'
+const DEBTS_KEY = 'centsible.debts.v1'
 
 export const DEFAULT_SETTINGS: Settings = {
   currency: 'USD',
   theme: 'system',
   budget: null,
+  notificationsEnabled: false,
 }
 
 export function loadExpenses(): Expense[] {
@@ -61,6 +63,25 @@ export function loadTrips(): Trip[] {
 export function saveTrips(trips: Trip[]) {
   try {
     localStorage.setItem(TRIPS_KEY, JSON.stringify(trips))
+  } catch {
+    // ignore
+  }
+}
+
+export function loadDebts(): Debt[] {
+  try {
+    const raw = localStorage.getItem(DEBTS_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+export function saveDebts(debts: Debt[]) {
+  try {
+    localStorage.setItem(DEBTS_KEY, JSON.stringify(debts))
   } catch {
     // ignore
   }
