@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { getState } from './db.js'
+import { collections } from './db.js'
 
 const SECRET = process.env.JWT_SECRET
 if (!SECRET) {
@@ -31,8 +31,8 @@ export function requireAuth(req, res, next) {
 }
 
 /** Must run after requireAuth. Rejects unless the current user's role is 'admin'. */
-export function requireAdmin(req, res, next) {
-  const user = getState().users.find((u) => u.id === req.userId)
+export async function requireAdmin(req, res, next) {
+  const user = await collections().users.findOne({ id: req.userId })
   if (!user || user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' })
   next()
 }

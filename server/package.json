@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Expensify API — auth, per-user data storage, and an admin endpoint. Plain Node/Express with a JSON-file store (no native dependencies, so it installs anywhere).",
+  "description": "Expensify API — auth, per-user data storage, and an admin endpoint. Plain Node/Express backed by MongoDB Atlas's free tier.",
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js"
@@ -13,6 +13,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.6.0"
   }
 }

@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import crypto from 'node:crypto'
-import { getState, persist } from '../db.js'
+import { collections } from '../db.js'
 import { signToken, publicUser, requireAuth } from '../auth.js'
 
 export const authRouter = Router()
@@ -18,8 +18,9 @@ authRouter.post('/signup', async (req, res) => {
     return res.status(400).json({ error: 'A valid email and a password of at least 8 characters are required' })
   }
   const normalizedEmail = normalizeEmail(email)
-  const state = getState()
-  if (state.users.some((u) => u.email === normalizedEmail)) {
+  const { users, settings } = collections()
+
+  if (await users.findOne({ email: normalizedEmail })) {
     return res.status(409).json({ error: 'An account with that email already exists' })
   }
 
@@ -32,9 +33,14 @@ authRouter.post('/signup', async (req, res) => {
     createdAt: Date.now(),
     lastLoginAt: Date.now(),
   }
-  state.users.push(user)
-  state.settings.push({ userId: user.id, ...DEFAULT_SETTINGS })
-  persist()
+
+  try {
+    await users.insertOne(user)
+  } catch (err) {
+    if (err.code === 11000) return res.status(409).json({ error: 'An account with that email already exists' })
+    throw err
+  }
+  await settings.insertOne({ userId: user.id, ...DEFAULT_SETTINGS })
 
   res.status(201).json({ token: signToken(user), user: publicUser(user) })
 })
@@ -45,20 +51,20 @@ authRouter.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Email and password are required' })
   }
   const normalizedEmail = normalizeEmail(email)
-  const state = getState()
-  const user = state.users.find((u) => u.email === normalizedEmail)
+  const { users } = collections()
+  const user = await users.findOne({ email: normalizedEmail })
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     return res.status(401).json({ error: 'Incorrect email or password' })
   }
 
-  user.lastLoginAt = Date.now()
-  persist()
+  const lastLoginAt = Date.now()
+  await users.updateOne({ id: user.id }, { $set: { lastLoginAt } })
 
-  res.json({ token: signToken(user), user: publicUser(user) })
+  res.json({ token: signToken(user), user: publicUser({ ...user, lastLoginAt }) })
 })
 
-authRouter.get('/me', requireAuth, (req, res) => {
-  const user = getState().users.find((u) => u.id === req.userId)
+authRouter.get('/me', requireAuth, async (req, res) => {
+  const user = await collections().users.findOne({ id: req.userId })
   if (!user) return res.status(401).json({ error: 'Not authenticated' })
   res.json({ user: publicUser(user) })
 })

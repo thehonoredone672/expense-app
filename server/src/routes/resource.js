@@ -1,52 +1,49 @@
 import { Router } from 'express'
 import crypto from 'node:crypto'
-import { getState, persist } from '../db.js'
+import { collections, stripInternal } from '../db.js'
 import { requireAuth } from '../auth.js'
-
-function stripUserId({ userId: _userId, ...rest }) {
-  return rest
-}
 
 /** A CRUD router scoped to the current user for a flat collection (expenses, trips, or debts). */
 export function createResourceRouter(collectionName) {
   const router = Router()
   router.use(requireAuth)
 
-  router.get('/', (req, res) => {
-    const items = getState()[collectionName].filter((item) => item.userId === req.userId)
-    res.json(items.map(stripUserId))
+  router.get('/', async (req, res) => {
+    const items = await collections()[collectionName].find({ userId: req.userId }).toArray()
+    res.json(items.map(stripInternal))
   })
 
-  router.post('/', (req, res) => {
+  router.post('/', async (req, res) => {
     const entry = { ...req.body, id: crypto.randomUUID(), userId: req.userId, createdAt: Date.now() }
-    getState()[collectionName].push(entry)
-    persist()
-    res.status(201).json(stripUserId(entry))
+    await collections()[collectionName].insertOne(entry)
+    res.status(201).json(stripInternal(entry))
   })
 
-  router.put('/:id', (req, res) => {
-    const list = getState()[collectionName]
-    const idx = list.findIndex((item) => item.id === req.params.id && item.userId === req.userId)
-    if (idx === -1) return res.status(404).json({ error: 'Not found' })
-    list[idx] = { ...list[idx], ...req.body, id: list[idx].id, userId: list[idx].userId, createdAt: list[idx].createdAt }
-    persist()
-    res.json(stripUserId(list[idx]))
+  router.put('/:id', async (req, res) => {
+    const coll = collections()[collectionName]
+    const patch = { ...req.body }
+    delete patch.id
+    delete patch.userId
+    delete patch.createdAt
+
+    const result = await coll.findOneAndUpdate(
+      { id: req.params.id, userId: req.userId },
+      { $set: patch },
+      { returnDocument: 'after' },
+    )
+    if (!result) return res.status(404).json({ error: 'Not found' })
+    res.json(stripInternal(result))
   })
 
-  router.delete('/:id', (req, res) => {
-    const list = getState()[collectionName]
-    const idx = list.findIndex((item) => item.id === req.params.id && item.userId === req.userId)
-    if (idx === -1) return res.status(404).json({ error: 'Not found' })
-    list.splice(idx, 1)
-    persist()
+  router.delete('/:id', async (req, res) => {
+    const result = await collections()[collectionName].deleteOne({ id: req.params.id, userId: req.userId })
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'Not found' })
     res.status(204).end()
   })
 
   // Bulk clear — backs the app's "Clear all data" setting.
-  router.delete('/', (req, res) => {
-    const state = getState()
-    state[collectionName] = state[collectionName].filter((item) => item.userId !== req.userId)
-    persist()
+  router.delete('/', async (req, res) => {
+    await collections()[collectionName].deleteMany({ userId: req.userId })
     res.status(204).end()
   })
 

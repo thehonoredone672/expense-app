@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import bcrypt from 'bcryptjs'
 import crypto from 'node:crypto'
-import { getState, persist } from './db.js'
+import { connect, collections } from './db.js'
 import { authRouter } from './routes/auth.js'
 import { createResourceRouter } from './routes/resource.js'
 import { settingsRouter } from './routes/settings.js'
@@ -39,13 +39,12 @@ async function bootstrapAdmin() {
     return
   }
   const email = ADMIN_EMAIL.trim().toLowerCase()
-  const state = getState()
-  const existing = state.users.find((u) => u.email === email)
+  const { users, settings } = collections()
+  const existing = await users.findOne({ email })
 
   if (existing) {
     if (existing.role !== 'admin') {
-      existing.role = 'admin'
-      persist()
+      await users.updateOne({ id: existing.id }, { $set: { role: 'admin' } })
       console.log(`[admin] Promoted existing user ${email} to admin`)
     }
     return
@@ -60,12 +59,17 @@ async function bootstrapAdmin() {
     createdAt: Date.now(),
     lastLoginAt: null,
   }
-  state.users.push(user)
-  state.settings.push({ userId: user.id, currency: 'USD', theme: 'system', budget: null, notificationsEnabled: false })
-  persist()
+  await users.insertOne(user)
+  await settings.insertOne({ userId: user.id, currency: 'USD', theme: 'system', budget: null, notificationsEnabled: false })
   console.log(`[admin] Created admin account for ${email}`)
 }
 
-bootstrapAdmin().then(() => {
-  app.listen(PORT, () => console.log(`Expensify API listening on port ${PORT}`))
-})
+connect()
+  .then(bootstrapAdmin)
+  .then(() => {
+    app.listen(PORT, () => console.log(`Expensify API listening on port ${PORT}`))
+  })
+  .catch((err) => {
+    console.error('[fatal] Could not start the server:', err.message)
+    process.exit(1)
+  })
