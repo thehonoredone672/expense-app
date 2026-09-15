@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CategoryId, Debt, Expense, Trip } from './types'
+import type { AuthUser, CategoryId, Debt, Expense, Trip } from './types'
+import { AuthProvider } from './context/AuthContext'
+import { useAuth } from './context/auth-context'
 import { useExpenses } from './hooks/useExpenses'
 import { useTrips } from './hooks/useTrips'
 import { useDebts } from './hooks/useDebts'
@@ -10,24 +12,65 @@ import { ExpenseForm } from './components/ExpenseForm'
 import { TripForm } from './components/TripForm'
 import { DebtForm } from './components/DebtForm'
 import { Toast } from './components/Toast'
+import { LegacyImportPrompt } from './components/LegacyImportPrompt'
 import { HomeScreen } from './screens/HomeScreen'
 import { TripsScreen } from './screens/TripsScreen'
 import { TripDetailScreen } from './screens/TripDetailScreen'
 import { DebtsScreen } from './screens/DebtsScreen'
 import { StatsScreen } from './screens/StatsScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
+import { AdminScreen } from './screens/AdminScreen'
+import { AuthScreen } from './screens/AuthScreen'
 import { getCurrencySymbol, todayISO } from './lib/format'
 import { exportJSON, exportCSV, readBackupFile } from './lib/backup'
+import { api } from './lib/api'
+import { hasUnhandledLegacyData, loadExpenses, loadTrips, loadDebts, markLegacyImportHandled } from './lib/storage'
 import type { PendingRecurring } from './lib/recurring'
 import { haptic } from './lib/haptics'
 import { useCelebration } from './hooks/useCelebration'
 import { PixelSpark } from './components/PixelSpark'
 
 export default function App() {
-  const { expenses, addExpense, updateExpense, deleteExpense, clearAll, importExpenses, unassignTrip } =
-    useExpenses()
-  const { trips, addTrip, updateTrip, deleteTrip, importTrips } = useTrips()
-  const { debts, addDebt, updateDebt, deleteDebt, setSettled, clearAll: clearAllDebts, importDebts } = useDebts()
+  return (
+    <AuthProvider>
+      <Root />
+    </AuthProvider>
+  )
+}
+
+function Root() {
+  const { status, user } = useAuth()
+
+  if (status === 'loading') {
+    return <div className="min-h-dvh bg-[var(--bg)] bg-dither" />
+  }
+  if (status === 'unauthenticated' || !user) {
+    return <AuthScreen />
+  }
+  return <AuthenticatedApp user={user} />
+}
+
+function AuthenticatedApp({ user }: { user: AuthUser }) {
+  const { logout } = useAuth()
+  const {
+    expenses,
+    addExpense,
+    updateExpense,
+    deleteExpense,
+    clearAll,
+    unassignTrip,
+    refetch: refetchExpenses,
+  } = useExpenses()
+  const { trips, addTrip, updateTrip, deleteTrip, refetch: refetchTrips } = useTrips()
+  const {
+    debts,
+    addDebt,
+    updateDebt,
+    deleteDebt,
+    setSettled,
+    clearAll: clearAllDebts,
+    refetch: refetchDebts,
+  } = useDebts()
   const { settings, updateSettings } = useSettings()
 
   useReminders(expenses, debts, settings)
@@ -49,12 +92,19 @@ export default function App() {
   const [debtFormOpen, setDebtFormOpen] = useState(false)
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
 
+  const [adminOpen, setAdminOpen] = useState(false)
+  const [legacyPromptOpen, setLegacyPromptOpen] = useState(false)
+
   const [toast, setToast] = useState<string | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const celebration = useCelebration()
 
   useEffect(() => () => {
     if (toastTimer.current) clearTimeout(toastTimer.current)
+  }, [])
+
+  useEffect(() => {
+    setLegacyPromptOpen(hasUnhandledLegacyData())
   }, [])
 
   useEffect(() => {
@@ -211,17 +261,41 @@ export default function App() {
   async function handleImportFile(file: File) {
     try {
       const imported = await readBackupFile(file)
-      importExpenses(imported.expenses)
-      importTrips(imported.trips)
-      importDebts(imported.debts)
+      const result = await api.importData(imported)
+      refetchExpenses()
+      refetchTrips()
+      refetchDebts()
       const parts = []
-      if (imported.expenses.length) parts.push(`${imported.expenses.length} expense${imported.expenses.length === 1 ? '' : 's'}`)
-      if (imported.trips.length) parts.push(`${imported.trips.length} trip${imported.trips.length === 1 ? '' : 's'}`)
-      if (imported.debts.length) parts.push(`${imported.debts.length} debt${imported.debts.length === 1 ? '' : 's'}`)
-      showToast(`Imported ${parts.join(', ')}`)
+      if (result.expenses) parts.push(`${result.expenses} expense${result.expenses === 1 ? '' : 's'}`)
+      if (result.trips) parts.push(`${result.trips} trip${result.trips === 1 ? '' : 's'}`)
+      if (result.debts) parts.push(`${result.debts} debt${result.debts === 1 ? '' : 's'}`)
+      showToast(parts.length ? `Imported ${parts.join(', ')}` : 'Nothing new to import')
     } catch {
       showToast('Could not read that file')
     }
+  }
+
+  async function handleImportLegacyData() {
+    try {
+      const result = await api.importData({ expenses: loadExpenses(), trips: loadTrips(), debts: loadDebts() })
+      refetchExpenses()
+      refetchTrips()
+      refetchDebts()
+      markLegacyImportHandled()
+      setLegacyPromptOpen(false)
+      const parts = []
+      if (result.expenses) parts.push(`${result.expenses} expense${result.expenses === 1 ? '' : 's'}`)
+      if (result.trips) parts.push(`${result.trips} trip${result.trips === 1 ? '' : 's'}`)
+      if (result.debts) parts.push(`${result.debts} debt${result.debts === 1 ? '' : 's'}`)
+      showToast(parts.length ? `Imported ${parts.join(', ')}` : 'Nothing new to import')
+    } catch {
+      showToast('Could not import your existing data')
+    }
+  }
+
+  function handleSkipLegacyImport() {
+    markLegacyImportHandled()
+    setLegacyPromptOpen(false)
   }
 
   function handleClearAll() {
@@ -292,6 +366,7 @@ export default function App() {
         )}
         {tab === 'settings' && (
           <SettingsScreen
+            user={user}
             settings={settings}
             expenseCount={expenses.length}
             debtCount={debts.length}
@@ -300,6 +375,8 @@ export default function App() {
             onExportJSON={() => exportJSON(expenses, trips, debts, settings)}
             onExportCSV={() => exportCSV(expenses, trips)}
             onImportFile={handleImportFile}
+            onLogout={logout}
+            onOpenAdmin={() => setAdminOpen(true)}
           />
         )}
       </div>
@@ -356,6 +433,10 @@ export default function App() {
           onDelete={handleDelete}
         />
       )}
+
+      {adminOpen && user.role === 'admin' && <AdminScreen onClose={() => setAdminOpen(false)} />}
+
+      {legacyPromptOpen && <LegacyImportPrompt onImport={handleImportLegacyData} onSkip={handleSkipLegacyImport} />}
 
       {toast && <Toast message={toast} />}
 

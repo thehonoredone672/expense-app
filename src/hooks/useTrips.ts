@@ -1,35 +1,44 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Trip } from '../types'
-import { loadTrips, saveTrips } from '../lib/storage'
+import { api } from '../lib/api'
 
 export function useTrips() {
-  const [trips, setTrips] = useState<Trip[]>(() => loadTrips())
+  const [trips, setTrips] = useState<Trip[]>([])
+
+  const refetch = useCallback(() => {
+    api
+      .listTrips()
+      .then(setTrips)
+      .catch((err) => console.error('Failed to load trips', err))
+  }, [])
 
   useEffect(() => {
-    saveTrips(trips)
-  }, [trips])
+    refetch()
+  }, [refetch])
 
   const addTrip = useCallback((trip: Omit<Trip, 'id' | 'createdAt'>) => {
-    const entry: Trip = { ...trip, id: crypto.randomUUID(), createdAt: Date.now() }
-    setTrips((prev) => [entry, ...prev])
-    return entry.id
+    const tempId = crypto.randomUUID()
+    const optimistic: Trip = { ...trip, id: tempId, createdAt: Date.now() }
+    setTrips((prev) => [optimistic, ...prev])
+    api
+      .createTrip(trip)
+      .then((saved) => setTrips((prev) => prev.map((t) => (t.id === tempId ? saved : t))))
+      .catch((err) => {
+        console.error('Failed to add trip', err)
+        setTrips((prev) => prev.filter((t) => t.id !== tempId))
+      })
+    return tempId
   }, [])
 
   const updateTrip = useCallback((id: string, patch: Omit<Trip, 'id' | 'createdAt'>) => {
     setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+    api.updateTrip(id, patch).catch((err) => console.error('Failed to update trip', err))
   }, [])
 
   const deleteTrip = useCallback((id: string) => {
     setTrips((prev) => prev.filter((t) => t.id !== id))
+    api.deleteTrip(id).catch((err) => console.error('Failed to delete trip', err))
   }, [])
 
-  const importTrips = useCallback((incoming: Trip[]) => {
-    setTrips((prev) => {
-      const existingIds = new Set(prev.map((t) => t.id))
-      const added = incoming.filter((t) => !existingIds.has(t.id))
-      return [...added, ...prev]
-    })
-  }, [])
-
-  return { trips, addTrip, updateTrip, deleteTrip, importTrips }
+  return { trips, addTrip, updateTrip, deleteTrip, refetch }
 }

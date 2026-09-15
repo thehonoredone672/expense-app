@@ -51,3 +51,23 @@ export interface Debt {
   settled: boolean
   createdAt: number
 }
+
+export type UserRole = 'user' | 'admin'
+
+export interface AuthUser {
+  id: string
+  email: string
+  role: UserRole
+  createdAt: number
+}
+
+export interface AdminUserRow {
+  id: string
+  email: string
+  role: UserRole
+  createdAt: number
+  lastLoginAt: number | null
+  expenseCount: number
+  tripCount: number
+  debtCount: number
+}

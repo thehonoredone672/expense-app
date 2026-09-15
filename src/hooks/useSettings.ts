@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Settings } from '../types'
-import { loadSettings, saveSettings } from '../lib/storage'
+import { DEFAULT_SETTINGS } from '../lib/storage'
+import { api } from '../lib/api'
 
 function applyTheme(theme: Settings['theme']) {
   const root = document.documentElement
@@ -10,12 +11,18 @@ function applyTheme(theme: Settings['theme']) {
 }
 
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings>(() => loadSettings())
+  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
 
   useEffect(() => {
-    saveSettings(settings)
+    api
+      .getSettings()
+      .then(setSettings)
+      .catch((err) => console.error('Failed to load settings', err))
+  }, [])
+
+  useEffect(() => {
     applyTheme(settings.theme)
-  }, [settings])
+  }, [settings.theme])
 
   useEffect(() => {
     if (settings.theme !== 'system') return
@@ -27,6 +34,7 @@ export function useSettings() {
 
   const updateSettings = useCallback((patch: Partial<Settings>) => {
     setSettings((prev) => ({ ...prev, ...patch }))
+    api.updateSettings(patch).catch((err) => console.error('Failed to update settings', err))
   }, [])
 
   return { settings, updateSettings }

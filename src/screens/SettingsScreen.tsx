@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { Trash2, Check, Download, Upload, FileSpreadsheet, BellRing } from 'lucide-react'
-import type { Settings, ThemePreference } from '../types'
+import { Trash2, Check, Download, Upload, FileSpreadsheet, BellRing, LogOut, ShieldCheck } from 'lucide-react'
+import type { AuthUser, Settings, ThemePreference } from '../types'
 import { CURRENCIES, getCurrencySymbol } from '../lib/format'
 import {
   getNotificationPermission,
@@ -10,6 +10,7 @@ import {
 } from '../lib/notifications'
 
 interface Props {
+  user: AuthUser
   settings: Settings
   expenseCount: number
   debtCount: number
@@ -18,6 +19,8 @@ interface Props {
   onExportJSON: () => void
   onExportCSV: () => void
   onImportFile: (file: File) => void
+  onLogout: () => void
+  onOpenAdmin: () => void
 }
 
 const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
@@ -27,6 +30,7 @@ const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
 ]
 
 export function SettingsScreen({
+  user,
   settings,
   expenseCount,
   debtCount,
@@ -35,6 +39,8 @@ export function SettingsScreen({
   onExportJSON,
   onExportCSV,
   onImportFile,
+  onLogout,
+  onOpenAdmin,
 }: Props) {
   const [confirming, setConfirming] = useState(false)
   const [budgetInput, setBudgetInput] = useState(settings.budget != null ? String(settings.budget) : '')
@@ -75,6 +81,44 @@ export function SettingsScreen({
   return (
     <div className="space-y-7 px-5 pb-8" style={{ paddingTop: 'calc(var(--safe-top) + 20px)' }}>
       <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+
+      <section>
+        <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Account</p>
+        <div className="card-flat-sm rounded-xl px-4 py-3.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="min-w-0 truncate text-[14.5px] font-medium">{user.email}</span>
+            {user.role === 'admin' && (
+              <span
+                className="shrink-0 rounded-md border-2 border-[var(--border-hard)] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide"
+                style={{ backgroundColor: 'var(--accent-2)', color: 'var(--accent-2-text)' }}
+              >
+                Admin
+              </span>
+            )}
+          </div>
+          <div className="mt-3 flex gap-2">
+            {user.role === 'admin' && (
+              <button
+                type="button"
+                onClick={onOpenAdmin}
+                className="press-sm flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-[var(--border-hard)] bg-[var(--surface)] py-2 text-[13.5px] font-semibold"
+              >
+                <ShieldCheck size={15} />
+                Admin
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onLogout}
+              className="press-sm flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-[var(--border-hard)] bg-[var(--surface)] py-2 text-[13.5px] font-semibold"
+              style={{ color: 'var(--danger)' }}
+            >
+              <LogOut size={15} />
+              Log out
+            </button>
+          </div>
+        </div>
+      </section>
 
       <section>
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Appearance</p>
