@@ -1,12 +1,12 @@
 {
   "name": "Expensify — Expense Tracker",
   "short_name": "Expensify",
-  "description": "A minimal, glass-styled way to track everyday spending, budgets, and trips.",
+  "description": "A minimal way to track everyday spending, budgets, and trips.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#4338ca",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "orientation": "portrait",
   "icons": [
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
