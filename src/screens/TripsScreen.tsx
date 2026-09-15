@@ -26,7 +26,7 @@ export function TripsScreen({ trips, expenses, currency, onSelect, onNewTrip }: 
 
   return (
     <div className="px-5 pb-6" style={{ paddingTop: 'calc(var(--safe-top) + 20px)' }}>
-      <h1 className="mb-5 text-2xl font-semibold">Trips</h1>
+      <h1 className="mb-5 text-2xl font-semibold tracking-tight">Trips</h1>
 
       {sortedTrips.length === 0 ? (
         <EmptyState

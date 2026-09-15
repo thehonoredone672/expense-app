@@ -38,7 +38,7 @@ export function BottomNav({ active, onChange, onAdd }: Props) {
             onAdd()
           }}
           aria-label="Add"
-          className="press absolute left-1/2 top-0 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl border-2 border-[var(--border-hard)] text-[var(--accent-2-text)]"
+          className="press absolute left-1/2 top-0 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border-2 border-[var(--border-hard)] text-[var(--accent-2-text)]"
           style={{
             width: 54,
             height: 54,

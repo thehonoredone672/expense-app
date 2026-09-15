@@ -49,10 +49,15 @@ html, body {
 body {
   margin: 0;
   color: var(--text);
-  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.006em;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.025em;
 }
 
 #root {
@@ -93,7 +98,7 @@ button {
 }
 
 .press {
-  transition: transform 110ms ease-out, box-shadow 110ms ease-out;
+  transition: transform 100ms cubic-bezier(0.32, 0.72, 0, 1), box-shadow 100ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .press:active {
@@ -125,7 +130,7 @@ button {
 }
 
 .animate-sheet-up {
-  animation: sheet-up 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: sheet-up 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fade-in {
@@ -138,13 +143,13 @@ button {
 }
 
 @keyframes pop-in {
-  from { opacity: 0; transform: scale(0.8) rotate(-4deg); }
-  60% { transform: scale(1.08) rotate(2deg); }
+  from { opacity: 0; transform: scale(0.86) rotate(-3deg); }
+  55% { transform: scale(1.05) rotate(1.5deg); }
   to { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
 .animate-pop-in {
-  animation: pop-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pop-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes tab-in {

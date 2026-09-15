@@ -61,7 +61,7 @@ export function CategoryDonut({ segments, total, currency }: Props) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-[11px] font-medium text-[var(--text-muted)]">Total</span>
-        <span className="text-[19px] font-semibold tabular-nums">{formatCurrency(total, currency)}</span>
+        <span className="text-[19px] font-semibold tracking-tight tabular-nums">{formatCurrency(total, currency)}</span>
       </div>
     </div>
   )

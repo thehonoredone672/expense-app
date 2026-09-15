@@ -72,7 +72,7 @@ export function TripDetailScreen({
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pb-6" style={dragging ? { overflow: 'hidden' } : undefined}>
-        <div className="card-flat rounded-xl px-5 py-5">
+        <div className="card-flat rounded-[22px] px-5 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span
@@ -97,7 +97,7 @@ export function TripDetailScreen({
             <p className="text-[13px] font-medium text-[var(--text-muted)]">
               {over ? 'Over budget by' : 'Remaining'}
             </p>
-            <p className="text-4xl font-semibold tabular-nums" style={{ color: over ? 'var(--danger)' : undefined }}>
+            <p className="text-4xl font-semibold tracking-tight tabular-nums" style={{ color: over ? 'var(--danger)' : undefined }}>
               {formatCurrency(animatedRemaining, currency)}
             </p>
             <div className="mt-3">

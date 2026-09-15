@@ -89,11 +89,11 @@ export function HomeScreen({
 
   return (
     <div className="px-5 pb-6" style={{ paddingTop: 'calc(var(--safe-top) + 20px)' }}>
-      <div className="card-flat rounded-xl px-5 py-5">
+      <div className="card-flat rounded-[22px] px-5 py-5">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[13px] font-medium text-[var(--text-muted)]">Total spent</p>
-            <p className="text-4xl font-semibold tabular-nums">{formatCurrency(animatedTotal, currency)}</p>
+            <p className="text-4xl font-semibold tracking-tight tabular-nums">{formatCurrency(animatedTotal, currency)}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {streak >= 2 && (

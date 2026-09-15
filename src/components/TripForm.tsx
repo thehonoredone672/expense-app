@@ -74,7 +74,7 @@ export function TripForm({ initial, currencySymbol, onClose, onSave, onDelete }:
       <div className="flex-1 overflow-y-auto" style={dragging ? { overflow: 'hidden' } : undefined}>
         <div className="flex items-baseline justify-center gap-1 py-6">
           <span className="text-3xl font-medium text-[var(--text-muted)]">{currencySymbol}</span>
-          <span className="text-5xl font-semibold tabular-nums">{budget}</span>
+          <span className="text-5xl font-semibold tracking-tight tabular-nums">{budget}</span>
         </div>
         <p className="pb-5 text-center text-[12.5px] text-[var(--text-muted)]">Fixed budget for this trip</p>
 

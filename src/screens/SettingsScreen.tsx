@@ -48,7 +48,7 @@ export function SettingsScreen({
 
   return (
     <div className="space-y-7 px-5 pb-8" style={{ paddingTop: 'calc(var(--safe-top) + 20px)' }}>
-      <h1 className="text-2xl font-semibold">Settings</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
 
       <section>
         <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Appearance</p>

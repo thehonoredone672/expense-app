@@ -103,7 +103,7 @@ export function ExpenseForm({
 
         <div className="flex items-baseline justify-center gap-1 py-6">
           <span className="text-3xl font-medium text-[var(--text-muted)]">{currencySymbol}</span>
-          <span className="text-5xl font-semibold tabular-nums">{amount}</span>
+          <span className="text-5xl font-semibold tracking-tight tabular-nums">{amount}</span>
         </div>
 
         <CategoryPicker value={category} onChange={setCategory} />
